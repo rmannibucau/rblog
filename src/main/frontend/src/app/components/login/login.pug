@@ -1,0 +1,15 @@
+div.align-center.container
+    form(id="loginForm", (ngSubmit)="onSubmit()")
+        h2.text-center Login
+        span(id="loginErrorMessages", style="color: red;") {{error}}
+        div.form-group
+            label(for="login") Username
+            input(id="login", type="text", placeholder="Enter your username...", required, autofocus, [(ngModel)]="formData.username").form-control
+        div.form-group
+            label(for="password") Password
+            input(id="password", type="password", placeholder="Enter your password...", required, [(ngModel)]="formData.password").form-control
+        div.checkbox
+            label
+                input(type="checkbox", [(ngModel)]="formData.rememberMe")
+                span Remember Me
+        button(id="loginSubmit", type="submit").btn.btn-lg.btn-primary.btn-block OK

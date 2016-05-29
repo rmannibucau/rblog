@@ -1,0 +1,47 @@
+div.align-center.container
+    div.input-group
+        input([(ngModel)]="filterText").form-control
+        span.input-group-btn
+            button((click)="doSearch()").btn.btn-default Search
+    table.table.table-bordered.table-responsive
+        thead
+            tr
+                th((click)="sortBy('id')") Id
+                th((click)="sortBy('title')") Title
+                th((click)="sortBy('type')") Type
+                th((click)="sortBy('slug')") Slug
+                th((click)="sortBy('publishDate')") Published
+                th((click)="sortBy('author.displayName')") Author
+                th((click)="sortBy('created')") Created
+                th((click)="sortBy('updated')") Last Update
+                th Actions
+        tbody
+            tr(*ngFor="let post of posts.rows").post
+                td {{post.id}}
+                td {{post.title}}
+                td {{post.type}}
+                td {{post.slug}}
+                td {{post.published}}
+                td {{post.author?.displayName}}
+                td {{post.created}}
+                td {{post.updated}}
+                td
+                    a([routerLink]="['/admin/post', post.id]", href="#")
+                        i.glyphicon.glyphicon-edit
+                        span Edit
+                    span &nbsp;&nbsp;
+                    a((click)="deletePost(post.id);$event.preventDefault();", href="#").deleteAction
+                        i.glyphicon.glyphicon-remove.text-danger
+                        span Delete
+    nav
+        ul.pager
+            li(*ngIf="hasPrevious").previous
+                a((click)="previousPage();$event.preventDefault();", href="#")
+                  span(aria-hidden="true") &larr;
+                  |&nbsp;Previous
+            li(*ngIf="hasNext").next
+                a((click)="nextPage();$event.preventDefault();", href="#")
+                  | Next&nbsp;
+                  span(aria-hidden="true") &rarr;
+
+simple-notifications([options]="notificationsOptions")

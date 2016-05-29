@@ -1,0 +1,81 @@
+div(id="mainWrapper")
+    div(id="data-low-protection", style="margin-bottom:0;", role="alert", *ngIf="showDataProtectionLawMessage").text-center.alert.alert-info.text-info
+        span This website uses cookies for statistics and Twitter. No personal data are stored.
+        span.hspace &nbsp;
+        button(type="button", (click)="acceptCookies()").btn.btn-primary.btn-xs Accept
+        span.hspace &nbsp;
+        button(type="button", (click)="rejectCookies()").btn.btn-danger.btn-xs Hide
+    nav(role="navigation").navbar.navbar-default
+        div.container.navbar-wrapper
+            div.navbar-header
+                button(type="button", data-toggle="collapse", data-target=".navbar-ex1-collapse").navbar-toggle
+                    span.sr-only Toggle navigation
+                    span.icon-bar
+                    span.icon-bar
+                    span.icon-bar
+                a(id="brandLink", [routerLink]="['/']").navbar-brand
+                    div.vspace10
+                    img(src="images/logo.png", alt="RBlog")
+            div.collapse.navbar-collapse.navbar-ex1-collapse
+                ul.nav.navbar-nav
+                    li.hidden
+                    //- TODO: handle subcategories
+                    li(*ngFor="let category of categories")
+                      a([routerLink]="['/category', category.slug ]", href="#")
+                        | {{ category.name }}
+                        span([style.background]="category.color || 'inherit'").category-menu-color &nbsp;
+                ul.nav.navbar-nav.navbar-right
+                  li
+                    div.vspace5
+                    form(role="search").navbar-form
+                      div.input-group
+                        input(type="text", placeholder="Search posts...", [(ngModel)]="searchText").form-control
+                        div.input-group-btn
+                          button(type="submit", (click)="search()").btn.btn-default
+                            i.glyphicon.glyphicon-search
+                  li(*ngIf="!isLogged()")
+                    div.vspace5
+                    a(id="loginLink", [routerLink]="['/login']").login-link
+                      i.fa.fa-sign-in
+                  li(*ngIf="isLogged()")
+                    div.vspace5
+                    a(id="logoutLink", [routerLink]="['/logout']").login-link
+                      i.fa.fa-sign-out
+                  li(*ngIf="isLogged()").dropdown
+                    div.vspace5
+                    a(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false").dropdown-toggle
+                        b.caret
+                    ul.dropdown-menu
+                        li
+                          a([routerLink]="['/admin/category/new']").dropdown-toggle Create a category
+                          a([routerLink]="['/admin/categories']").dropdown-toggle Categories
+                        li.divider
+                        li
+                          a([routerLink]="['/admin/post/new']").dropdown-toggle Create a post
+                          a([routerLink]="['/admin/posts']").dropdown-toggle Posts
+                        li.divider
+                        li
+                          a([routerLink]="['/admin/user/new']").dropdown-toggle Create a user
+                          a([routerLink]="['/admin/users']").dropdown-toggle Users
+                        li.divider
+                        li
+                          a([routerLink]="['/admin/profile']").dropdown-toggle Profile
+
+    div(id="main").container
+        div.container
+            router-outlet
+    div.clearfix
+
+    div(id="footer").text-center
+        div.container
+            section
+                a(href="https://twitter.com/rmannibucau", target="_blank")
+                    i.fa.fa-twitter.fa-2x.social
+                a(href="https://www.linkedin.com/in/rmannibucau", target="_blank")
+                    i.fa.fa-linkedin-square.fa-2x.social
+            section
+                p
+                  | Implemented by&nbsp;
+                  a(href="https://www.linkedin.com/in/rmannibucau", target="_blank") Romain
+                  | &nbsp;&amp; Designed by&nbsp;
+                  a(href="https://www.linkedin.com/in/mnarjisse", target="_blank") Narjisse

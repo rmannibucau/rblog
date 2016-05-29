@@ -1,0 +1,2 @@
+export PATH=~/.rblog-build/node-installation-dir/node/:$PATH
+export APP_ENV=dev

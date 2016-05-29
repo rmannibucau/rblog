@@ -1,0 +1,23 @@
+div(*ngIf="data.lasts && data.lasts.length > 0").row
+  h1 Recently added
+  div.home-container
+    div(*ngFor="let post of data.lasts").home-box.box-padding.col-sm-4
+      div([style.border-left-color]="post.categories && post.categories.length > 0 ? (post.categories[0].color || '#eeeeee') : '#eeeeee'").bs-callout.width100.relative
+        post-summary([post]="post", [readMoreRight]="true")
+    div.clearfix
+div(*ngFor="let category of data.categories").row
+  span(*ngIf="data.byCategories[category].posts.length > 0")
+    h1 {{ category }}
+    div.home-container
+      div(*ngFor="let post of data.byCategories[category].posts").home-box.box-padding.col-sm-4
+        div([style.border-left-color]="data.byCategories[category].color || '#eeeeee'").bs-callout.width100.relative
+          post-summary([post]="post", [readMoreRight]="true")
+      div.clearfix
+    div.vspace10
+    a([routerLink]="['/category', data.byCategories[category].slug ]", role="button", href="#").btn.btn-primary All {{ category }} posts
+    div.vspace
+div.clearfix
+div(*ngIf="data.lasts && data.lasts.length == 0").row
+    p No post yet.
+
+simple-notifications([options]="notificationsOptions")

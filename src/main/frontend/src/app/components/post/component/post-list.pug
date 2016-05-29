@@ -1,0 +1,19 @@
+div.row
+  h1 {{ title }}
+  div
+    div(*ngIf="!posts.rows || posts.rows.length == 0") No post yet.
+    div.posts
+      div(*ngFor="let post of posts.rows")
+        div.vspace
+        div([style.border-left]="'solid 5px ' + (post.categories && post.categories.length > 0 && post.categories[0].color ? post.categories[0].color : 'inherit')").post.relative
+          post-summary([post]="post", [hasReadMore]="hasReadMore", [readMoreRight]="readMoreRight", [readMoreButton]="readMoreButton")
+    nav
+      ul.pager
+        li(*ngIf="hasPrevious").previous
+          a((click)="previousPage($event)", href="#")
+            span(aria-hidden="true") &larr;
+            | &nbsp;Previous Page
+        li(*ngIf="hasNext").next
+          a((click)="nextPage($event)", href="#")
+            | Next Page&nbsp;
+            span(aria-hidden="true") &rarr;

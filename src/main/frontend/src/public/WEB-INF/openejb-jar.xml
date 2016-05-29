@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openejb-jar>
+  <pojo-deployment class-name="jaxrs-application">
+    <properties>
+      cxf.jaxrs.skip-provider-scanning = true
+      cxf.jaxrs.providers = com.github.rmannibucau.rblog.jaxrs.provider.JSonProvider,\
+        com.github.rmannibucau.rblog.security.web.InvalidCredentialsExceptionExceptionMapper,\
+        com.github.rmannibucau.rblog.jaxrs.provider.TransactionExceptionExceptionMapper,\
+        com.github.rmannibucau.rblog.jaxrs.provider.AccessDeniedExceptionExceptionMapper,\
+        com.github.rmannibucau.rblog.jaxrs.provider.EntityConcurrentModificationExceptionExceptionMapper
+    </properties>
+  </pojo-deployment>
+</openejb-jar>

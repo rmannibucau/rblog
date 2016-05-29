@@ -1,0 +1,26 @@
+div(*ngIf="post").align-center.row
+    h2(id="postTitle") {{ post.title }}
+    div
+      p
+          em Created on {{ fixDate(post.published || post.created) | date:'fullDate' }} by {{ post.author?.displayName }}
+      a(href="https://twitter.com/intent/tweet", data-via="rmannibucau", [attr.data-text]="post.title", [attr.data-url]="pageUrl", data-size="large").twitter-share-button.pull-right
+      p(id="postContent", [innerHTML]="post.content")
+    duv.vspace &nbsp;
+    div
+      div(*ngIf="post.categories && post.categories.length > 0").col-sm-6
+        a([routerLink]="['/category/', post.categories[0].slug]", href="#").pull-right
+          div.text-center
+            i.fa.fa-external-link.fa-2x
+          div.text-center Back to {{post.categories[0].name}}&nbsp;
+      div(*ngIf="post.categories && post.categories.length > 0").col-sm-6
+        a([routerLink]="['/']", href="#").pull-left
+          div.text-center
+            i.fa.fa-home.fa-2x
+          div.text-center Home
+      div(*ngIf="!post.categories || post.categories.length == 0").col-sm-12
+        a([routerLink]="['/']", href="#").text-center
+          div
+            i.fa.fa-home.fa-2x
+          div Home
+
+simple-notifications([options]="notificationsOptions")

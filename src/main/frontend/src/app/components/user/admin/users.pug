@@ -1,0 +1,25 @@
+div.align-center.container
+    table.table.table-bordered.table-responsive
+        thead
+            tr
+                th Id
+                th Username
+                th Display Name
+                th Mail
+                th Action
+        tbody
+            tr(*ngFor="let user of users").category
+                td {{user.id}}
+                td {{user.username}}
+                td {{user.displayName}}
+                td {{user.mail}}
+                td
+                    a(v-link="['AdminUserById', {'id': user.id}]")
+                        i.glyphicon.glyphicon-edit
+                        span Edit
+                    span &nbsp;&nbsp;
+                    a((click)="deleteUser(user.id)").deleteAction
+                        i.glyphicon.glyphicon-remove.text-danger
+                        span Delete
+
+simple-notifications([options]="notificationsOptions")

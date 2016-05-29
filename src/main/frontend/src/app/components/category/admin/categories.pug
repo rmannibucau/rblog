@@ -1,0 +1,25 @@
+div.align-center.container
+    table.table.table-bordered.table-responsive
+        thead
+            tr
+                th Id
+                th Name
+                th Slug
+                th Parent Id
+                th Action
+        tbody
+            tr(*ngFor="let category of categories").category
+                td {{category.id}}
+                td {{category.name}}
+                td {{category.slug}}
+                td {{category.parent?.id}}
+                td
+                    a([routerLink]="['/admin/category', category.id]")
+                        i.glyphicon.glyphicon-edit
+                        span Edit
+                    span &nbsp;&nbsp;
+                    a((click)="deleteCategory(category.id)").deleteAction
+                        i.glyphicon.glyphicon-remove.text-danger
+                        span Delete
+
+simple-notifications([options]="notificationsOptions")
