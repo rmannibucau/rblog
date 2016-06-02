@@ -47,6 +47,25 @@ In that case you will need to activated on your server the multi part without an
 <Context allowCasualMultipartParsing="true" />
 ----
 
+== Max text size
+
+Fe things will limit the max size of the content of a post depending where you deploy. Here are few hints to check:
+
+- MySQL: by default OpenJPA would use `TEXT` which limits the size to 64k which would be quite small if you embed images in the posts. To fix it alter the column:
+
+[source,sql]
+----
+alter table rblog_post modify content mediumtext;
+----
+
+- TomEE: by default tomee 7.0.0 johnzon setup will limit JSON string content to 4k so ensure t adjust it (7.0.1 will accept a bit more):
+
+[source]
+----
+# whatever fits your need, number of chars
+org.apache.johnzon.max-string-length = 655360
+----
+
 == Possible Enhancements
 
 (feel free to PR ;))
