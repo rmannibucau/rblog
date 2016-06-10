@@ -177,6 +177,13 @@
             <rblog.environment>dev</rblog.environment>
             <org.apache.johnzon.max-string-length>16384</org.apache.johnzon.max-string-length>
 
+            <!-- for perf tests -->
+            <connector.attributes.maxThreads>512</connector.attributes.maxThreads>
+            <executor>new://Resource?type=ManagedExecutorService</executor>
+            <executor.Max>1024</executor.Max> <!-- some tolerance between request and their thread processing -->
+            <executor.Queue>0</executor.Queue> <!-- reject immediately -->
+            <executor.Lazy>false</executor.Lazy>
+
             <!-- to test analytics setup
             <rblog.analytics.code>UA-XXXXX</rblog.analytics.code>
             -->

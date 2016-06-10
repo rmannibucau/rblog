@@ -38,7 +38,7 @@ public class UserResourceTest {
     @Test
     public void getAll() {
         IntStream.range(0, 5).forEach(i -> blog.createUser("test_" + i, "test"));
-        blog.withTempUser((u, token) -> {
+        blog.withTempUser((userId, token) -> {
             final List<UserModel> users = blog.target().path("user").request()
                 .header(SecurityFilter.SECURITY_HEADER, token)
                 .get(new GenericType<List<UserModel>>() {});
