@@ -76,7 +76,7 @@ public class ConfigurationProducer {
         final String val = configuration.value();
         final int colon = val.indexOf(':');
         final boolean hasDefault = val.startsWith("${") && val.endsWith("}") && colon > 0;
-        final String key = hasDefault ? val.substring("${".length(), hasDefault ? colon : val.length() - 1) : val;
+        final String key = hasDefault ? val.substring("${".length(), colon) : val;
         return decryptIfNeeded(ofNullable(values.get(key)).orElseGet(() -> hasDefault ? val.substring(colon + 1, val.length() - 1) : null));
     }
 
