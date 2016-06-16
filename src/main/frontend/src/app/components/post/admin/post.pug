@@ -7,37 +7,37 @@ div.align-center.container
             div.col-sm-8
                 div.form-group
                     label(for="postTitle") Title
-                    input(id="postTitle", type="text", placeholder="Enter the post title...", [(ngModel)]="formData.title").form-control
+                    input(id="postTitle", type="text", placeholder="Enter the post title...", [(ngModel)]="formData.title", name="title").form-control
                 div.form-group
                     label(for="postSlug") Complete the URL below
                     div
                         span {{slugBaseUrl}}
-                        input(id="postSlug", type="text", placeholder="Enter the post slug...", [(ngModel)]="formData.slug", maxlength="255").form-control.inline-input
+                        input(id="postSlug", type="text", placeholder="Enter the post slug...", [(ngModel)]="formData.slug", maxlength="255", name="slug").form-control.inline-input
                 div.form-group
                     label(for="postEditor") Your content
-                    textarea(id="postEditor", [(ngModel)]="formData.content")
+                    textarea(id="postEditor", [(ngModel)]="formData.content", name="content")
                 button(id="postSubmit", type="submit").btn.btn-lg.btn-primary.center-block {{ submitText }}
             div.col-sm-4
                 div.form-group
                     label(for="postSummary") Summary
-                    textarea(id="postSummary", placeholder="Enter the post summary...", [(ngModel)]="formData.summary", maxlength="255").form-control
+                    textarea(id="postSummary", placeholder="Enter the post summary...", [(ngModel)]="formData.summary", maxlength="255", name="summary").form-control
                 div.form-group
                     label(for="postPublishDate") Publication Date
-                    input(id="postPublishDate", type="datetime-local", [(ngModel)]="formData.published").form-control
+                    input(id="postPublishDate", type="datetime-local", [(ngModel)]="formData.published", name="published").form-control
                 div.form-group
                     label(for="postSocial") Social Network Notification
-                    textarea(id="postSocial", placeholder="Something to send on social networks...", [(ngModel)]="formData.notification.text", maxlength="140").form-control
+                    textarea(id="postSocial", placeholder="Something to send on social networks...", [(ngModel)]="formData.notification.text", maxlength="140", name="notificationText").form-control
                 div.form-group
                     label(for="postCategories") Categories
                     select(id="postCategories", (change)="onCategorySelect($event)", multiple).form-control
                         option(*ngFor="let category of categories", [value]="category.id", [selected]="isCategorySelected(category)") {{ category.name }}
                 div.form-group
                     label(for="postAuthor") Author
-                    select(id="postAuthor", [(ngModel)]="formData.author").form-control
+                    select(id="postAuthor", [(ngModel)]="formData.author", name="author").form-control
                         option(*ngFor="let author of users", [value]="author") {{ author.displayName }}
                 div.form-group
                     label(for="postType") Type
-                    select(id="postType", [(ngModel)]="formData.type").form-control
+                    select(id="postType", [(ngModel)]="formData.type", name="type").form-control
                         option(value="POST", selected) Post
                         option(value="PAGE") Page (not yet supported)
 

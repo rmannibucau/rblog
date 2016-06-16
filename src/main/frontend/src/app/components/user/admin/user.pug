@@ -5,19 +5,19 @@ div.align-center.container
         span(id="loginErrorMessages", style="color: red;") {{error}}
         div.form-group
             label(for="userUsername") Login
-            input(id="userUsername", type="text", placeholder="Enter the user login...", required, autofocus, [(ngModel)]="formData.username").form-control
+            input(id="userUsername", type="text", placeholder="Enter the user login...", required, autofocus, [(ngModel)]="formData.username", name="username").form-control
         div.form-group
             label(for="userDisplayName") Display Name
-            input(id="userDisplayName", type="text", placeholder="Enter the user display name...", required, [(ngModel)]="formData.displayName").form-control
+            input(id="userDisplayName", type="text", placeholder="Enter the user display name...", required, [(ngModel)]="formData.displayName", name="displayName").form-control
         div.form-group
             label(for="userMail") Mail
-            input(id="userMail", type="email", placeholder="Enter the user mail...", [(ngModel)]="formData.mail").form-control
+            input(id="userMail", type="email", placeholder="Enter the user mail...", [(ngModel)]="formData.mail", name="mail").form-control
         div.form-group
             label(for="userPassword") Password
-            input(id="userPassword", type="password", placeholder="Enter the user password...", required, [(ngModel)]="formData.password").form-control
+            input(id="userPassword", type="password", placeholder="Enter the user password...", required, [(ngModel)]="formData.password", name="password").form-control
         div.form-group
             label(for="userPassword2") Confirm Password
-            input(id="userPassword2", type="password", placeholder="Confirm the user password...", required, [(ngModel)]="formData.password2").form-control
+            input(id="userPassword2", type="password", placeholder="Confirm the user password...", required, [(ngModel)]="formData.password2", name="password2").form-control
         button(id="userSubmit", type="submit").btn.btn-lg.btn-primary.btn-block {{ submitText }}
 
 simple-notifications([options]="notificationsOptions")

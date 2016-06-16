@@ -1,4 +1,5 @@
-import {Component, AfterViewInit, AfterViewChecked, OnChanges, SimpleChange} from '@angular/core';
+import {Component, AfterViewInit, AfterViewChecked, OnChanges, SimpleChange } from '@angular/core';
+import {DomSanitizationService} from '@angular/platform-browser';
 import {OnActivate, RouteSegment, RouteTree} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {PostService} from '../../service/post.service';
@@ -27,7 +28,8 @@ export class Post implements OnActivate, AfterViewChecked, AfterViewInit {
                 private notifyService: NotificationService,
                 private twitter: Twitter,
                 private ckEditorLoader: CKEditorLoader,
-                private analyticsService: AnalyticsService) {
+                private analyticsService: AnalyticsService,
+                private domSanitizationService : DomSanitizationService) {
     }
 
     routerOnActivate(curr: RouteSegment, prev?: RouteSegment, currTree?: RouteTree, prevTree?: RouteTree) {
@@ -36,6 +38,7 @@ export class Post implements OnActivate, AfterViewChecked, AfterViewInit {
       this.service.findBySlug(slug).subscribe(
           post => {
               this.post = post;
+              this.post.content = this.domSanitizationService.bypassSecurityTrustHtml(this.post.content);
               this.refreshView = true;
           }, error => this.notifyService.error('Error', 'Can\'t retrieve post (HTTP ' + error.status + ').'));
     }

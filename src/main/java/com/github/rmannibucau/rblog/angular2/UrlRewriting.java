@@ -1,5 +1,8 @@
 package com.github.rmannibucau.rblog.angular2;
 
+import com.github.rmannibucau.rblog.configuration.Configuration;
+
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -17,6 +20,10 @@ import java.io.IOException;
 // note this filter only work for root webapp, for others you would need to hack ROOT one to redirect properly.
 @WebFilter(asyncSupported = true, urlPatterns = "/*")
 public class UrlRewriting implements Filter {
+    @Inject
+    @Configuration("${:false}")
+    private Boolean active;
+
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         // no-op
@@ -24,6 +31,11 @@ public class UrlRewriting implements Filter {
 
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
+        if (!active) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         final HttpServletRequest httpServletRequest = HttpServletRequest.class.cast(request);
         final String uri = httpServletRequest.getRequestURI().substring(httpServletRequest.getContextPath().length());
         if (isIncluded(uri)) {

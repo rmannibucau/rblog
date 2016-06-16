@@ -4,12 +4,12 @@ div.align-center.container
         span(id="loginErrorMessages", style="color: red;") {{error}}
         div.form-group
             label(for="login") Username
-            input(id="login", type="text", placeholder="Enter your username...", required, autofocus, [(ngModel)]="formData.username").form-control
+            input(id="login", type="text", placeholder="Enter your username...", required, autofocus, [(ngModel)]="formData.username", name="login").form-control
         div.form-group
             label(for="password") Password
-            input(id="password", type="password", placeholder="Enter your password...", required, [(ngModel)]="formData.password").form-control
+            input(id="password", type="password", placeholder="Enter your password...", required, [(ngModel)]="formData.password", name="password").form-control
         div.checkbox
             label
-                input(type="checkbox", [(ngModel)]="formData.rememberMe")
+                input(type="checkbox", [(ngModel)]="formData.rememberMe", name="rememberMe")
                 span Remember Me
         button(id="loginSubmit", type="submit").btn.btn-lg.btn-primary.btn-block OK

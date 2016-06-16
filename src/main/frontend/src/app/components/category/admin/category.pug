@@ -5,16 +5,16 @@ div.align-center.container
         span(id="loginErrorMessages", style="color: red;") {{error}}
         div.form-group
             label(for="categoryName") Category Name
-            input(id="categoryName", type="text", placeholder="Enter the category name...", required, autofocus, [(ngModel)]="formData.name").form-control
+            input(id="categoryName", type="text", placeholder="Enter the category name...", required, autofocus, [(ngModel)]="formData.name", name="name").form-control
         div.form-group
             label(for="categorySlug") Category Slug
-            input(id="categorySlug", type="text", placeholder="Enter the category slug...", [(ngModel)]="formData.slug").form-control
+            input(id="categorySlug", type="text", placeholder="Enter the category slug...", [(ngModel)]="formData.slug", name="slug").form-control
         div.form-group
             label(for="categoryColor") Category Color
-            input(id="categoryColor", type="color", [(ngModel)]="formData.color").form-control
+            input(id="categoryColor", type="color", [(ngModel)]="formData.color", name="color").form-control
         div.form-group
             label(for="categoryParent") Parent
-            select(id="categoryParent", [(ngModel)]="formData.parentId").form-control
+            select(id="categoryParent", [(ngModel)]="formData.parentId", name="parentId").form-control
                 option(*ngFor="let category of categories", [value]="category.id") {{ category.name }}
         div.vspace
         button(id="categorySubmit", type="submit").btn.btn-lg.btn-primary.center-block {{ submitText }}

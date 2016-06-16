@@ -29,7 +29,7 @@ div(id="mainWrapper")
                     div.vspace5
                     form(role="search").navbar-form
                       div.input-group
-                        input(type="text", placeholder="Search posts...", [(ngModel)]="searchText").form-control
+                        input(type="text", placeholder="Search posts...", [(ngModel)]="searchText", name="search").form-control
                         div.input-group-btn
                           button(type="submit", (click)="search()").btn.btn-default
                             i.glyphicon.glyphicon-search

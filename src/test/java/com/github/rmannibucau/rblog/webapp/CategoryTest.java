@@ -111,7 +111,7 @@ public class CategoryTest {
         try {
             blog.goTo("/category/post-category");
             blog.waitUntil(() -> blog.isDisplayed(post));
-            assertEquals("http://localhost:" + blog.getHttpPort() + /*"/rblog/#" + */ "/post/the-title", post.findElement(By.tagName("a")).getAttribute("href"));
+            assertEquals("http://localhost:" + blog.getHttpPort() + "/rblog/#/post/the-title", post.findElement(By.tagName("a")).getAttribute("href"));
         } finally {
             blog.inTx(() -> {
                 em.remove(em.find(Post.class, ids[0]));

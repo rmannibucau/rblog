@@ -1,6 +1,6 @@
 div.align-center.container
     div.input-group
-        input([(ngModel)]="filterText").form-control
+        input([(ngModel)]="filterText", name="filterText").form-control
         span.input-group-btn
             button((click)="doSearch()").btn.btn-default Search
     table.table.table-bordered.table-responsive

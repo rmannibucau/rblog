@@ -1,5 +1,6 @@
 import {enableProdMode, provide, PLATFORM_DIRECTIVES} from "@angular/core";
-import {HashLocationStrategy, LocationStrategy, FORM_PROVIDERS} from '@angular/common';
+import {HashLocationStrategy, LocationStrategy} from '@angular/common';
+import {disableDeprecatedForms, provideForms} from '@angular/forms';
 import {bootstrap} from '@angular/platform-browser-dynamic';
 import {ELEMENT_PROBE_PROVIDERS} from '@angular/platform-browser';
 import {HTTP_PROVIDERS} from '@angular/http';
@@ -28,6 +29,8 @@ bootstrap(App, [
     ...HTTP_PROVIDERS,
     ...ROUTER_PROVIDERS,
     ...ENV_PROVIDERS,
+    disableDeprecatedForms(),
+    provideForms(),
     provide(LocationStrategy, {useClass: HashLocationStrategy}),
     //provide(APP_BASE_HREF, {useValue: '/'}),
     provide(PLATFORM_DIRECTIVES, {useValue: [ROUTER_DIRECTIVES], multi: true}),

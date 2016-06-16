@@ -2,6 +2,7 @@ import '../vendor';
 
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {Routes, Router} from '@angular/router';
+import {Http} from '@angular/http';
 import {Location} from '@angular/common';
 
 import {SecurityService} from './service/security.service';
@@ -57,8 +58,22 @@ export class App implements OnInit, OnDestroy {
               private dataLowProtection: DataProtectionLaw,
               private categoryService: CategoryService,
               private router: Router,
-              private location: Location) {
+              private location: Location,
+              private http: Http) {
     this.showDataProtectionLawMessage = !dataLowProtection.accepted;
+    if (!dataLowProtection.accepted) { // check we are in France, if so keep the "accept" behavior otherwise just use cookies
+      http.get('//freegeoip.net/json/').subscribe(
+          response => {
+            try {
+              if (response.json()['country_name'] != 'France') {
+                dataLowProtection.onAccept();
+                this.showDataProtectionLawMessage = false;
+              }
+            } catch (e) { /*ignore*/}
+          },
+          error => {/*ignore, let's fallback on default case*/});
+    }
+
     this.logged = this.securityService.isLogged();
     this.sub = this.securityService.lifecycleListener.subscribe(state => this.logged = state);
     categoryService.listenChanges(event => this.loadCategories());
