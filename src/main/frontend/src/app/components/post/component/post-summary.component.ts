@@ -18,6 +18,6 @@ export class PostSummary {
   }
 
   fixDate(postDate) {
-    return postDate ? new Date(postDate) : postDate;
+    return postDate ? new Date(Date.parse(postDate)) : postDate;
   }
 }

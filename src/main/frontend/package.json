@@ -25,7 +25,8 @@
     "jquery-ui": "1.10.5",
     "ckeditor": "4.5.8",
     "ng2-cookies": "0.1.5",
-    "angular2-notifications": "0.1.57"
+    "angular2-notifications": "0.1.57",
+    "intl": "1.2.4"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.2",

@@ -62,6 +62,6 @@ export class Post implements OnActivate, AfterViewChecked, AfterViewInit {
     }
 
     fixDate(postDate) {
-      return postDate ? new Date(postDate) : postDate;
+      return postDate ? new Date(Date.parse(postDate)) : postDate;
     }
 }
