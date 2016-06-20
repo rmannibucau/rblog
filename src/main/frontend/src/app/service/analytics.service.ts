@@ -1,6 +1,7 @@
 import {Injectable, EventEmitter} from "@angular/core";
 import {RestClient} from "./rest.service";
 import {DataProtectionLaw} from './cookie.service';
+import {SecurityService} from './security.service';
 
 @Injectable()
 export class AnalyticsService {
@@ -8,9 +9,13 @@ export class AnalyticsService {
   private pages: Array<string> = [];
 
   constructor(private http: RestClient,
-              private dpl: DataProtectionLaw) {
+              private dpl: DataProtectionLaw,
+              private securityService: SecurityService) {
+      if (this.isSkipped()) {
+        return;
+      }
       this.dpl.onAccepted(() => {
-        http.get('configuration')
+          http.get('configuration')
         .map(r => r.analytics)
         .subscribe(code => {
           if (!code) {
@@ -33,14 +38,21 @@ export class AnalyticsService {
       });
     }
 
-    track(page) {
-      if (!window['ga']) {
-        if (this.pages.indexOf(page) < 0) {
-          this.pages.push(page);
-        }
-        return;
-      }
-      window['ga']('set', 'page', page);
-      window['ga']('send', 'pageview');
+  track(page) {
+    if (this.isSkipped()) {
+      return;
     }
+    if (!window['ga']) {
+      if (this.pages.indexOf(page) < 0) {
+        this.pages.push(page);
+      }
+      return;
+    }
+    window['ga']('set', 'page', page);
+    window['ga']('send', 'pageview');
   }
+
+  private isSkipped() { // we don't want to track the activity of admins
+    return this.securityService.isLogged();
+  }
+}
