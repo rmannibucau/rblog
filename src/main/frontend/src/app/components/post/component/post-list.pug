@@ -1,6 +1,11 @@
 div.row
   h1 {{ title }}
-  div
+  div(*ngIf="posts == null")
+    div.spinner.center-block
+      div.bounce1
+      div.bounce2
+      div.bounce3
+  div(*ngIf="posts")
     div(*ngIf="!posts.rows || posts.rows.length == 0") No post yet.
     div.posts
       div(*ngFor="let post of posts.rows")

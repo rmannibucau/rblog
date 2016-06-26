@@ -18,7 +18,7 @@ export class PostList implements AfterViewInit {
   pageSize: number = 10;
   hasNext: boolean = false;
   hasPrevious: boolean = false;
-  posts = {};
+  posts: Array<any>;
 
   constructor(private service: PostService) {
   }
