@@ -1,19 +1,31 @@
-import {OnActivate, RouteSegment, RouteTree, Router} from '@angular/router';
+import {OnDestroy} from '@angular/core';
+import {Router} from '@angular/router';
 import {SecurityService} from '../../service/security.service';
 
-export abstract class AdminComponent {
+export abstract class AdminComponent implements OnDestroy {
   routeAllowed: boolean = false;
+
+  private sub: any;
 
   constructor(protected router: Router,
               protected securityService: SecurityService) {
+    this.sub = this.router
+      .routerState
+      .queryParams
+      .subscribe(params => this.routerOnActivate(params));
   }
 
-  routerOnActivate(curr: RouteSegment, prev?: RouteSegment, currTree?: RouteTree, prevTree?: RouteTree) {
-    this.routeAllowed = !(curr.urlSegments.length > 0 && curr.urlSegments[0].segment == 'admin' && curr.urlSegments[0].segment != 'logout' && !this.securityService.isLogged());
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+  }
+
+  routerOnActivate(params) {
+    const path = this.router.url;
+    this.routeAllowed = !(path.indexOf('admin') == 0 && path.indexOf('logout') != 0 && !this.securityService.isLogged());
     if (!this.routeAllowed) {
       this.router.navigate(['/login']);
     } else {
-      this.onActivate(curr);
+      this.onActivate(params);
     }
   }
 

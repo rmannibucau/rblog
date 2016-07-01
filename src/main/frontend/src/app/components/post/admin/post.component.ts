@@ -48,7 +48,7 @@ export class AdminPost extends AdminComponent implements AfterViewInit {
           categories => this.categories = categories,
           error => this.notifyService.error('Error', 'Can\'t retrieve categories (HTTP ' + error.status + ').'));
 
-      const postId = curr.getParam('id');
+      const postId = curr['id'];
       if (postId) {
           this.fetchUsers(false);
 

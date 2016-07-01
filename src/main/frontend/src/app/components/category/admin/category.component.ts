@@ -12,12 +12,14 @@ import {NotificationService} from '../../../service/notification.service';
   directives: [SimpleNotificationsComponent],
   providers: [NotificationsService, NotificationService]
 })
-export class AdminCategory extends AdminComponent {
+export class AdminCategory extends AdminComponent implements OnInit {
     notificationsOptions = {};
     formData = {};
     categories = [];
     submitText = '';
     title = '';
+
+    private categoryId: string;
 
     constructor(private service: CategoryService,
                 private notifyService: NotificationService,
@@ -27,18 +29,22 @@ export class AdminCategory extends AdminComponent {
     }
 
     onActivate(curr) {
+      this.categoryId = curr['id'];
+    }
+
+    ngOnInit() {
       this.service.findAll().subscribe(
           categories => this.categories = categories,
           error => this.notifyService.error('Error getting top posts', 'Can\'t retrieve top posts (HTTP ' + error.status + ').'));
 
-      var categoryId = curr.getParam('id');
-      if (categoryId) {
+
+      if (this.categoryId) {
           this.submitText = 'Update';
           this.title = 'Update category';
-          this.service.findById(categoryId)
+          this.service.findById(this.categoryId)
             .subscribe(
               category => this.formData = category,
-              error => this.notifyService.error('Error getting category ' + categoryId, 'Can\'t retrieve the category (HTTP ' + error.status + ').'))
+              error => this.notifyService.error('Error getting category ' + this.categoryId, 'Can\'t retrieve the category (HTTP ' + error.status + ').'))
       } else {
           this.submitText = 'Create';
           this.title = 'New category';

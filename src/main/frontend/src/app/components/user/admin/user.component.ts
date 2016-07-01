@@ -27,7 +27,7 @@ export class AdminUser extends AdminComponent {
 
 
   onActivate(curr) {
-    const userId = curr.getParam('id');
+    const userId = curr['id'];
     if (userId) {
         this.submitText = 'Update';
         this.title = 'Update user';

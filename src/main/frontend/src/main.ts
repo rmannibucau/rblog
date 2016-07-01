@@ -2,9 +2,9 @@ import {enableProdMode, provide, PLATFORM_DIRECTIVES} from "@angular/core";
 import {HashLocationStrategy, LocationStrategy} from '@angular/common';
 import {disableDeprecatedForms, provideForms} from '@angular/forms';
 import {bootstrap} from '@angular/platform-browser-dynamic';
-import {ELEMENT_PROBE_PROVIDERS} from '@angular/platform-browser';
+import {enableDebugTools, disableDebugTools} from '@angular/platform-browser';
 import {HTTP_PROVIDERS} from '@angular/http';
-import {ROUTER_DIRECTIVES, ROUTER_PROVIDERS} from '@angular/router';
+import {provideRouter, ROUTER_DIRECTIVES} from '@angular/router';
 
 import {App} from './app/app';
 
@@ -18,21 +18,22 @@ import {CKEditorLoader} from './app/service/ckeditor.service';
 import {Twitter} from './app/service/twitter.service';
 import {AnalyticsService} from './app/service/analytics.service';
 
+import {routes} from './app/app.routes';
+
 const ENV_PROVIDERS = [];
-if (process.env.compileEnv === 'dev') {
-  ENV_PROVIDERS.push(ELEMENT_PROBE_PROVIDERS);
-} else {
+const isProd = process.env.compileEnv != 'dev';
+if (isProd) {
+  disableDebugTools();
   enableProdMode();
 }
 
 bootstrap(App, [
     ...HTTP_PROVIDERS,
-    ...ROUTER_PROVIDERS,
+    ...provideRouter(routes),
     ...ENV_PROVIDERS,
     disableDeprecatedForms(),
     provideForms(),
     provide(LocationStrategy, {useClass: HashLocationStrategy}),
-    //provide(APP_BASE_HREF, {useValue: '/'}),
     provide(PLATFORM_DIRECTIVES, {useValue: [ROUTER_DIRECTIVES], multi: true}),
     SecurityService,
     RestClient,
@@ -44,4 +45,7 @@ bootstrap(App, [
     Twitter,
     AnalyticsService
 ])
-.catch(err => console.error(err));
+.catch(err => console.error(err))
+.then(app => {
+  if (!isProd) {enableDebugTools(app); }
+});

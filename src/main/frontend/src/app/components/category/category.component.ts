@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {OnActivate, RouteSegment, RouteTree} from '@angular/router';
+import {Router} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {CategoryService} from '../../service/category.service';
 import {PostService} from '../../service/post.service';
@@ -19,18 +19,27 @@ export class Category {
     category = {};
     searchOptions: any;
 
+    private sub: any;
+
     constructor(private service: CategoryService,
                 private postService: PostService,
                 private notifyService: NotificationService,
-                private analyticsService: AnalyticsService) {
+                private analyticsService: AnalyticsService,
+                private router: Router) {
+      this.sub = this.router
+        .routerState
+        .queryParams
+        .subscribe(params => {
+          this.slug = params['slug'];
+          this.analyticsService.track('/category/' + this.slug);
+
+          this.searchOptions = {categorySlug: this.slug};
+          this.fetchCategory();
+        });
     }
 
-    routerOnActivate(curr: RouteSegment, prev?: RouteSegment, currTree?: RouteTree, prevTree?: RouteTree) {
-      this.slug = curr.getParam('slug');
-      this.analyticsService.track('/category/' + this.slug);
-
-      this.searchOptions = {categorySlug: this.slug};
-      this.fetchCategory();
+    ngOnDestroy() {
+      this.sub.unsubscribe();
     }
 
     fetchCategory() {
