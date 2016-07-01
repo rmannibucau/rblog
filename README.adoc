@@ -70,9 +70,10 @@ org.apache.johnzon.max-string-length = 655360
 
 (feel free to PR ;))
 
-- theme/theming (hardcoded today)
-- Support of Markdown and potentially Asciidoctor (optional and async start cause JRuby by default would be a pain) syntax
-- Attachement GUI and linkage in the content
-- TomEE Embedded fat jar (`java -jar rblog.jar` or `java -jar rblog.war` or `java -jar tomee-embedded.jar --path rblog.war`)
-- TomEE distribution (pre-packaged rblog zip: `unzip rblog.zip && cd rblog-version && ./bin/startup.sh`)
+- [enhancement] write endpoints should use a nested tx to ensure to commit before returning a value
+- [feature] theme/theming (hardcoded today)
+- [feature] Support of Markdown and potentially Asciidoctor (optional and async start cause JRuby by default would be a pain) syntax
+- [feature] Attachement GUI and linkage in the content
+- [feature] TomEE Embedded fat jar (`java -jar rblog.jar` or `java -jar rblog.war` or `java -jar tomee-embedded.jar --path rblog.war`)
+- [feature] TomEE distribution (pre-packaged rblog zip: `unzip rblog.zip && cd rblog-version && ./bin/startup.sh`) or openshift setup
 - ...

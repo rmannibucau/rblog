@@ -70,6 +70,7 @@ public class PostTest {
         final long catId = blog.inTx(() -> {
             final Category category = new Category();
             category.setName("Post Category");
+            category.setSlug("post-category");
             em.persist(category);
             em.flush();
             return category.getId();
