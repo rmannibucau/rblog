@@ -20,9 +20,10 @@ import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-
+import javax.ws.rs.core.Response;
 import java.util.Set;
 
 import static com.github.rmannibucau.rblog.lang.Exceptions.orNull;
@@ -47,6 +48,10 @@ public class TokenResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public TokenValue login(final Credentials credentials) {
+        if (credentials.getUsername() == null || credentials.getPassword() == null) {
+            throw new WebApplicationException("Invalid credentials", Response.Status.FORBIDDEN);
+        }
+
         final User user = orNull(
             () -> entityManager.createNamedQuery(User.FIND_BY_CREDENTIALS, User.class)
                 .setParameter("username", credentials.getUsername())

@@ -1,4 +1,4 @@
-import {Component, Input, EventEmitter, AfterViewInit} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChange, AfterViewInit} from '@angular/core';
 import {PostSummary} from './post-summary.component';
 import {PostService} from '../../../service/post.service';
 
@@ -26,6 +26,12 @@ export class PostList implements AfterViewInit {
   ngAfterViewInit() {
     this.searchOptions['number'] = this.pageSize; // constant for now
     this.load();
+  }
+
+  ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
+    if (changes && changes['searchOptions']) {
+      this.load();
+    }
   }
 
   previousPage(e) {

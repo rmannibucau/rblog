@@ -1,6 +1,6 @@
-import {Component, AfterViewInit, AfterViewChecked, OnChanges, SimpleChange, OnDestroy } from '@angular/core';
+import {Component, AfterViewInit, AfterViewChecked, OnInit } from '@angular/core';
 import {DomSanitizationService} from '@angular/platform-browser';
-import {Router} from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {PostService} from '../../service/post.service';
 import {Twitter} from '../../service/twitter.service';
@@ -17,13 +17,12 @@ declare var $: any;
   providers: [NotificationsService, NotificationService],
   styles: [require('../../../public/js/lib/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css')]
 })
-export class Post implements AfterViewChecked, AfterViewInit, OnDestroy {
+export class Post implements AfterViewChecked, AfterViewInit, OnInit {
     notificationsOptions = {};
     post: any;
     pageUrl: string;
 
     private refreshView = false;
-    private sub: any;
 
     constructor(private service: PostService,
                 private notifyService: NotificationService,
@@ -31,24 +30,18 @@ export class Post implements AfterViewChecked, AfterViewInit, OnDestroy {
                 private ckEditorLoader: CKEditorLoader,
                 private analyticsService: AnalyticsService,
                 private domSanitizationService : DomSanitizationService,
-                private router: Router) {
-      this.sub = this.router
-        .routerState
-        .queryParams
-        .subscribe(params => {
-          const slug = params['slug'];
-          this.analyticsService.track('/post/' + slug);
-          this.service.findBySlug(slug).subscribe(
-              post => {
-                  this.post = post;
-                  this.post.content = this.domSanitizationService.bypassSecurityTrustHtml(this.post.content);
-                  this.refreshView = true;
-              }, error => this.notifyService.error('Error', 'Can\'t retrieve post (HTTP ' + error.status + ').'));
-        });
+                private route: ActivatedRoute) {
     }
 
-    ngOnDestroy() {
-      this.sub.unsubscribe();
+    ngOnInit() {
+      const slug = this.route.snapshot.params['slug'];
+      this.analyticsService.track('/post/' + slug);
+      this.service.findBySlug(slug).subscribe(
+          post => {
+              this.post = post;
+              this.post.content = this.domSanitizationService.bypassSecurityTrustHtml(this.post.content);
+              this.refreshView = true;
+          }, error => this.notifyService.error('Error', 'Can\'t retrieve post (HTTP ' + error.status + ').'));
     }
 
     ngAfterViewInit() {

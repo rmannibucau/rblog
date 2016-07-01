@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
@@ -12,7 +12,7 @@ import {NotificationService} from '../../../service/notification.service';
   directives: [SimpleNotificationsComponent],
   providers: [NotificationsService, NotificationService]
 })
-export class AdminUser extends AdminComponent {
+export class AdminUser extends AdminComponent implements OnInit {
     notificationsOptions = {};
     formData = {};
     submitText = '';
@@ -21,13 +21,14 @@ export class AdminUser extends AdminComponent {
     constructor(private service: UserService,
                 private notifyService: NotificationService,
                 router: Router,
+                route: ActivatedRoute,
                 securityService: SecurityService) {
-      super(router, securityService);
+      super(router, route, securityService);
     }
 
 
-  onActivate(curr) {
-    const userId = curr['id'];
+  ngOnInit() {
+    const userId = this.route.snapshot.params['id'];
     if (userId) {
         this.submitText = 'Update';
         this.title = 'Update user';

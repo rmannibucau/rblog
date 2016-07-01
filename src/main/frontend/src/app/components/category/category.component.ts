@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
+import {Component, OnDestroy} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {CategoryService} from '../../service/category.service';
 import {PostService} from '../../service/post.service';
@@ -13,7 +13,7 @@ import {NotificationService} from '../../service/notification.service';
   directives: [SimpleNotificationsComponent, PostList],
   providers: [NotificationsService, NotificationService]
 })
-export class Category {
+export class Category implements OnDestroy {
     notificationsOptions = {};
     slug: string;
     category = {};
@@ -25,17 +25,13 @@ export class Category {
                 private postService: PostService,
                 private notifyService: NotificationService,
                 private analyticsService: AnalyticsService,
-                private router: Router) {
-      this.sub = this.router
-        .routerState
-        .queryParams
-        .subscribe(params => {
-          this.slug = params['slug'];
+                private route: ActivatedRoute) {
+        this.sub = this.route.params.subscribe(params => {
+          this.slug = params['slug']
           this.analyticsService.track('/category/' + this.slug);
-
           this.searchOptions = {categorySlug: this.slug};
           this.fetchCategory();
-        });
+        })
     }
 
     ngOnDestroy() {

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.rmannibucau.rblog.jpa.PostType.POST;
+import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.rules.RuleChain.outerRule;
@@ -74,7 +75,13 @@ public class PostTest {
             em.flush();
             return category.getId();
         });
-        try {
+        try {while (!Boolean.getBoolean("d")) {
+            try {
+                sleep(250);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
             blog.executeInAdminContext(() -> {
                 blog.goTo("/admin/post/new");
                 blog.waitUntil(() -> blog.isDisplayed(postTitle) && blog.isDisplayed(postCategories) && isContentShown());

@@ -43,12 +43,12 @@ export class App implements OnInit, OnDestroy {
     }
 
     this.logged = this.securityService.isLogged();
-    this.sub = this.securityService.lifecycleListener.subscribe(state => this.logged = state);
-    categoryService.listenChanges(event => this.loadCategories());
-    this.loadCategories();
 	}
 
   ngOnInit() {
+    this.sub = this.securityService.lifecycleListener.subscribe(state => this.logged = state);
+    this.categoryService.listenChanges(event => this.loadCategories());
+    this.loadCategories();
     $(document).on('click','.navbar-collapse', e => {
         if( $(e.target).is('a') ) {
             $('.navbar-ex1-collapse').collapse('hide');

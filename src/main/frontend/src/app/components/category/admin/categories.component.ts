@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
@@ -19,8 +19,9 @@ export class AdminCategories extends AdminComponent implements OnInit {
   constructor(private service: CategoryService,
               private notifyService: NotificationService,
               router: Router,
+              route: ActivatedRoute,
               securityService: SecurityService) {
-    super(router, securityService);
+    super(router, route, securityService);
   }
 
   ngOnInit() {

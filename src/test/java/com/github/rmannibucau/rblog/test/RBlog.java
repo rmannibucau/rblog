@@ -57,11 +57,12 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
+import static org.junit.Assert.assertEquals;
 
 @ContainerProperties({
     @ContainerProperties.Property(name = "rblogDataSource", value = "new://Resource?type=DataSource"),
     @ContainerProperties.Property(name = "rblogDataSource.JdbcDriver", value = "org.h2.Driver"),
-    @ContainerProperties.Property(name = "rblogDataSource.JdbcUrl", value = "jdbc:h2:mem:rblog"),
+    @ContainerProperties.Property(name = "rblogDataSource.JdbcUrl", value = "jdbc:h2:mem:rblog_test"),
     // @ContainerProperties.Property(name = "rblog.LogSql", value = "true"),
 
     // don't worry, these are random
@@ -292,6 +293,8 @@ public class RBlog {
         public void login(final RBlog blog, final String user, final String pwd) {
             blog.setInputText(login, user);
             blog.setInputText(password, pwd);
+            assertEquals(user, login.getAttribute("value"));
+            assertEquals(pwd, password.getAttribute("value"));
             submit.click();
         }
     }

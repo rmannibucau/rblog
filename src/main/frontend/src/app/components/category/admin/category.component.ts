@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
@@ -19,17 +19,12 @@ export class AdminCategory extends AdminComponent implements OnInit {
     submitText = '';
     title = '';
 
-    private categoryId: string;
-
     constructor(private service: CategoryService,
                 private notifyService: NotificationService,
                 router: Router,
+                route: ActivatedRoute,
                 securityService: SecurityService) {
-      super(router, securityService);
-    }
-
-    onActivate(curr) {
-      this.categoryId = curr['id'];
+      super(router, route, securityService);
     }
 
     ngOnInit() {
@@ -37,14 +32,14 @@ export class AdminCategory extends AdminComponent implements OnInit {
           categories => this.categories = categories,
           error => this.notifyService.error('Error getting top posts', 'Can\'t retrieve top posts (HTTP ' + error.status + ').'));
 
-
-      if (this.categoryId) {
+      const categoryId = this.route.snapshot.params['id'];
+      if (categoryId) {
           this.submitText = 'Update';
           this.title = 'Update category';
-          this.service.findById(this.categoryId)
+          this.service.findById(categoryId)
             .subscribe(
               category => this.formData = category,
-              error => this.notifyService.error('Error getting category ' + this.categoryId, 'Can\'t retrieve the category (HTTP ' + error.status + ').'))
+              error => this.notifyService.error('Error getting category ' + categoryId, 'Can\'t retrieve the category (HTTP ' + error.status + ').'))
       } else {
           this.submitText = 'Create';
           this.title = 'New category';

@@ -1,5 +1,5 @@
-import {Component, AfterViewInit} from '@angular/core';
-import {Router} from '@angular/router';
+import {Component, OnInit, AfterViewInit} from '@angular/core';
+import {Router, ActivatedRoute} from '@angular/router';
 import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
@@ -20,7 +20,7 @@ const INPUT_DATE_FORMAT = 'MM/DD/YYYY HH:MM A';
   directives: [SimpleNotificationsComponent],
   providers: [NotificationsService, NotificationService]
 })
-export class AdminPost extends AdminComponent implements AfterViewInit {
+export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
     notificationsOptions = {};
     dateTimePicker: any;
 
@@ -38,17 +38,18 @@ export class AdminPost extends AdminComponent implements AfterViewInit {
                 private ckEditorLoader: CKEditorLoader,
                 private notifyService: NotificationService,
                 router: Router,
+                route: ActivatedRoute,
                 securityService: SecurityService) {
-      super(router, securityService);
+      super(router, route, securityService);
       this.slugBaseUrl = window.location.href.replace(/#.*/, '') + '#/post/';
     }
 
-    onActivate(curr) {
+    ngOnInit() {
       this.categoryService.findAll().subscribe(
           categories => this.categories = categories,
           error => this.notifyService.error('Error', 'Can\'t retrieve categories (HTTP ' + error.status + ').'));
 
-      const postId = curr['id'];
+      const postId = this.route.snapshot.params['id'];
       if (postId) {
           this.fetchUsers(false);
 
