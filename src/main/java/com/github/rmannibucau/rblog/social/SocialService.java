@@ -5,5 +5,7 @@ import java.util.concurrent.CompletableFuture;
 public interface SocialService {
     boolean isActive();
 
+    void validate(String message);
+
     CompletableFuture<?> publish(String message);
 }

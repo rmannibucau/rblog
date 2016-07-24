@@ -19,6 +19,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
@@ -43,6 +45,43 @@ public class TwitterServiceTest {
     @After
     public void before() {
         mock.reset();
+    }
+
+    @Test
+    public void length() {
+        final Map<String, Integer> messages = new LinkedHashMap<>();
+        messages.put("Simple tweet", 12);
+        messages.put("Simple tweet with trailing http://link", 50);
+        messages.put("Simple tweet with trailing https://link", 50);
+        messages.put("Simple tweet with trailing http://link?q=true", 50);
+        messages.put("Simple tweet with trailing https://link?q=true", 50);
+        messages.put("Simple tweet with trailing http://link-test.com/test?gdbezudh-iphen", 50);
+        messages.put("Simple tweet with trailing https://link-test.com/test?gdbezudh-iphen", 50);
+        messages.put("Simple tweet with a http://link in the middle", 57);
+        messages.put("Simple tweet with trailing http://link?q=true in the middle", 64);
+        messages.put("Simple tweet with trailing http://link-test.com/test?gdbezudh-iphen in the middle", 64);
+        messages.put("Simple tweet with a\nhttp://link in the middle", 57);
+        messages.put("Simple tweet with trailing https://link?q=true\nin the middle", 64);
+        messages.put("Simple tweet with\ntrailing http://link-test.com/test?gdbezudh-iphen in\nthe middle", 64);
+        messages.put("http://link for a simple tweet", 42);
+        messages.put("https://link for a simple tweet", 42);
+        messages.put("http://link\nfor a simple tweet", 42);
+        messages.put("https://link\nfor a simple tweet", 42);
+        messages.entrySet()
+                .forEach(tweet -> assertEquals(tweet.getKey(), tweet.getValue().intValue(), twitterService.messageLength(tweet.getKey())));
+    }
+
+    @Test
+    public void validate() {
+        try {
+            twitterService.validate(
+                    "Super new post on the blog\n\n" +
+                    ">>>> http://bit.ly/GDBEHIKBD3748 <<<<\n\n" +
+                    "About a super topic\n\n#hash #tag #super #yeah\n\n" +
+                    "Come and read more about it ASAP!\n");
+        } catch (final IllegalArgumentException iae) {
+            assertEquals("Message too long: 143 instead of 140", iae.getMessage());
+        }
     }
 
     @Test

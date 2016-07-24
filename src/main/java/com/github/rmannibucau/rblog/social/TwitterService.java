@@ -3,6 +3,7 @@ package com.github.rmannibucau.rblog.social;
 import com.github.rmannibucau.rblog.configuration.Configuration;
 import com.github.rmannibucau.rblog.lang.JaxRsPromise;
 import com.github.rmannibucau.rblog.service.URLService;
+import lombok.Getter;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
@@ -24,6 +25,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.joining;
@@ -49,6 +52,15 @@ public class TwitterService implements SocialService {
     @Inject
     @Configuration("${rblog.twitter.api.update.url:https://api.twitter.com/1.1/statuses/update.json}")
     private String updateEndpoint;
+
+    @Inject
+    @Configuration("${rblog.twitter.link.length:23}")
+    private Integer twitterLinkLen;
+
+    @Inject
+    @Getter
+    @Configuration("${rblog.twitter.link.length:140}")
+    private Integer twitterMaxLen;
 
     @Inject
     private TimestampProvider timestampProvider;
@@ -82,13 +94,48 @@ public class TwitterService implements SocialService {
     }
 
     @Override
+    public void validate(final String message) {
+        int len;
+        if (message != null && (len = messageLength(message)) > twitterMaxLen) {
+            throw new IllegalArgumentException("Message too long: " + len + " instead of " + twitterMaxLen);
+        }
+    }
+
+    @Override
     public CompletableFuture<?> publish(final String message) {
         final JaxRsPromise jaxRsPromise = new JaxRsPromise();
         final Future<?> future = updateTarget.request()
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .header("Authorization", buildAuthorizationHeader(singletonMap("status", message))).async()
-            .post(Entity.entity("status=" + urlService.percentEncode(message), MediaType.APPLICATION_FORM_URLENCODED), jaxRsPromise.toJaxRsCallback());
+                .accept(MediaType.APPLICATION_JSON_TYPE)
+                .header("Authorization", buildAuthorizationHeader(singletonMap("status", message))).async()
+                .post(Entity.entity("status=" + urlService.percentEncode(message), MediaType.APPLICATION_FORM_URLENCODED), jaxRsPromise.toJaxRsCallback());
         return jaxRsPromise.propagateCancel(future).toFuture();
+    }
+
+    // any link will be considered as a 23 characters long string
+    // so take it into account for the length computation
+    public int messageLength(final String message) {
+        final int globalDiff = Stream.of("http://", "https://")
+                .mapToInt(prefix -> {
+                    int diff = 0;
+                    int startIdx = 0;
+                    do {
+                        final int linkIdx = message.indexOf(prefix, startIdx);
+                        if (linkIdx >= 0) {
+                            final int minIdx = startIdx + prefix.length();
+                            final int realEnd = IntStream.of(message.indexOf(' ', linkIdx), message.indexOf('\n', linkIdx), message.length())
+                                    .filter(i -> i >= minIdx)
+                                    .min()
+                                    .orElse(-1);
+                            final int linkLen = realEnd - linkIdx;
+                            diff += twitterLinkLen - linkLen;
+                            startIdx = realEnd;
+                            continue;
+                        }
+                        break;
+                    } while (startIdx > 0 && startIdx < message.length());
+                    return diff;
+                }).sum();
+        return message.length() + globalDiff;
     }
 
     private String buildAuthorizationHeader(final Map<String, String> params) {
@@ -102,15 +149,15 @@ public class TwitterService implements SocialService {
         values.putAll(params);
 
         // encode
-        values.entrySet().stream().forEach(e -> e.setValue(urlService.percentEncode(e.getValue())));
+        values.entrySet().forEach(e -> e.setValue(urlService.percentEncode(e.getValue())));
 
         final String signature = hmac(signingString(values));
         values.put("oauth_signature", signature);
 
         return "OAuth " + values.entrySet().stream()
-            .filter(e -> e.getKey().startsWith("oauth_"))
-            .map(e -> e.getKey() + "=\"" + e.getValue() + "\"")
-            .collect(joining(", "));
+                .filter(e -> e.getKey().startsWith("oauth_"))
+                .map(e -> e.getKey() + "=\"" + e.getValue() + "\"")
+                .collect(joining(", "));
     }
 
     private String hmac(final String signingString) {

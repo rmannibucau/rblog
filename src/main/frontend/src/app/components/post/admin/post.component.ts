@@ -14,6 +14,10 @@ declare var CKEDITOR: any;
 
 const INPUT_DATE_FORMAT = 'MM/DD/YYYY HH:MM A';
 
+const TWEETER_LINK_PREFIXES = ['http://', 'https://'];
+const TWEETER_MAX_LEN = 140;
+const TWEEK_LINK_LEN = 23;
+
 @Component({
   selector: 'post',
   template: require('./post.pug'),
@@ -24,6 +28,7 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
     notificationsOptions = {};
     dateTimePicker: any;
 
+    maxNotificationsChars = TWEETER_MAX_LEN;
     formData = {type: 'POST', categories: [], notification: {}};
     submitText = '';
     title = '';
@@ -115,6 +120,32 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
         this.postService.save(copy).map(p => this.postLoadPost(p)).subscribe(result => {
             this.router.navigate(['/admin/posts']);
         }, error => this.notifyService.error('Error', 'Can\'t save post (HTTP ' + error.status + ').'));
+    }
+
+    maxTweeterMessageLength(message) { // see com.github.rmannibucau.rblog.social.TwitterService#messageLength
+      if (!message) {
+        return TWEETER_MAX_LEN;
+      }
+      return TWEETER_MAX_LEN - TWEETER_LINK_PREFIXES.map(prefix => {
+        let diff = 0;
+        let startIdx = 0;
+        do {
+            const linkIdx = message.indexOf(prefix, startIdx);
+            if (linkIdx >= 0) {
+                const realEnd = Math.min.apply(null, [message.indexOf(' ', linkIdx), message.indexOf('\n', linkIdx), message.length].filter(i => i >= startIdx + prefix.length));
+                const linkLen = realEnd - linkIdx;
+                diff += TWEEK_LINK_LEN - linkLen;
+                startIdx = realEnd;
+                continue;
+            }
+            break;
+        } while (startIdx > 0 && startIdx < message.length);
+        return diff;
+      }).reduce((a, b) => a + b, 0);
+    }
+
+    remainingCharacters(message) {
+      return this.maxTweeterMessageLength(message) - (message ? message.length : 0);
     }
 
     private postLoadPost(post) {

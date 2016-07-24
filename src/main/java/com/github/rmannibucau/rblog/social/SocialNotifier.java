@@ -51,6 +51,10 @@ public class SocialNotifier {
             .toArray(SocialService[]::new);
     }
 
+    public void validate(final String message) {
+        Stream.of(activeServices).forEach(s -> s.validate(message));
+    }
+
     @Schedule(hour = "*", minute = "*/2", persistent = false) // each 2 mn check if something to do
     public void publishIfNeeded() {
         final List<Notification> notifications = entityManager.createNamedQuery("Notification.findByStateAndDate", Notification.class)

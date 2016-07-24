@@ -25,8 +25,8 @@ div.align-center.container
                     label(for="postPublishDate") Publication Date
                     input(id="postPublishDate", type="datetime-local", [(ngModel)]="formData.published", name="published").form-control
                 div.form-group
-                    label(for="postSocial") Social Network Notification
-                    textarea(id="postSocial", placeholder="Something to send on social networks...", [(ngModel)]="formData.notification.text", maxlength="140", name="notificationText").form-control
+                    label(for="postSocial") Social Network Notification (#characters: {{ remainingCharacters(formData.notification.text) }})
+                    textarea(id="postSocial", placeholder="Something to send on social networks...", [(ngModel)]="formData.notification.text", [attr.maxlength]="maxTweeterMessageLength(formData.notification.text)", name="notificationText").form-control
                 div.form-group
                     label(for="postCategories") Categories
                     select(id="postCategories", (change)="onCategorySelect($event)", multiple).form-control

@@ -19,7 +19,9 @@ import com.github.rmannibucau.rblog.jpa.PostType;
 import com.github.rmannibucau.rblog.jpa.User;
 import com.github.rmannibucau.rblog.security.cdi.Logged;
 import com.github.rmannibucau.rblog.service.SlugService;
+import com.github.rmannibucau.rblog.social.SocialNotifier;
 
+import javax.ejb.EJBException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -66,6 +68,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static javax.persistence.TemporalType.TIMESTAMP;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
 @Path("post")
 @ApplicationScoped
@@ -97,6 +100,9 @@ public class PostResource {
     @Inject
     @Configuration("${rblog.posts.top.size:3}")
     private Integer topSize;
+
+    @Inject
+    private SocialNotifier notfier;
 
     @GET
     @Async
@@ -283,6 +289,18 @@ public class PostResource {
     public void post(final PostModel model, @Suspended final AsyncResponse response) {
         final boolean newEntry = model.getId() == 0;
 
+        final NotificationModel notificationModel = model.getNotification();
+        final boolean hasNotification = notificationModel != null && notificationModel.getText() != null && !notificationModel.getText().trim().isEmpty();
+        if (hasNotification) {
+            try {
+                notfier.validate(notificationModel.getText());
+            } catch (final EJBException e) {
+                rethrowNotificationError(e.getCause());
+            } catch (final IllegalArgumentException iae) {
+                rethrowNotificationError(iae);
+            }
+        }
+
         final Post post;
         if (newEntry) {
             post = new Post();
@@ -324,8 +342,7 @@ public class PostResource {
 
         // notification
         Notification notification = entityManager.find(Notification.class, post.getId());
-        final NotificationModel notificationModel = model.getNotification();
-        if (notificationModel != null && notificationModel.getText() != null && !notificationModel.getText().trim().isEmpty()) {
+        if (hasNotification) {
             final Date date = ofNullable(notificationModel.getDate()).orElse(model.getPublished());
 
             final boolean newNotif = notification == null;
@@ -394,6 +411,10 @@ public class PostResource {
                                 .setParameter("publishedDate", new Date(), TIMESTAMP)
                                 .getSingleResult(),
                         NoResultException.class), false));
+    }
+
+    private void rethrowNotificationError(final Throwable iae) {
+        throw new WebApplicationException(Response.status(BAD_REQUEST).entity(iae.getMessage()).build());
     }
 
     private PostModel findById(final long id) {

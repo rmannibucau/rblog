@@ -29,6 +29,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -578,6 +579,24 @@ public class PostResourceTest {
                 // categories are not deleted with rows
                 assertNotNull(entityManager.createQuery("select c from Category c where c.name = :name", Category.class).setParameter("name", "New Category").getSingleResult());
             }
+        });
+    }
+
+    @Test
+    public void invalidNotification() {
+        blog.withTempUser((user, token) -> {
+            final Date published = new Date();
+            final Response response = blog.target().path("post/admin").request()
+                    .header(SecurityFilter.SECURITY_HEADER, token)
+                    .post(Entity.entity(new PostModel(
+                            0, "post", null, "Title", "Summ", "Content", null, null, published,
+                            new UserModel(user, null, null, null, null, 0), 0, null, null,
+                            new NotificationModel("Super new post on the blog\n\n" +
+                                    ">>>> http://bit.ly/GDBEHIKBD3748 <<<<\n\n" +
+                                    "About a super topic\n\n#hash #tag #super #yeah\n\n" +
+                                    "Come and read more about it ASAP!\n", published)), MediaType.APPLICATION_JSON_TYPE));
+            assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+            assertEquals("Message too long: 143 instead of 140", response.readEntity(String.class));
         });
     }
 
