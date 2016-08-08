@@ -12,9 +12,9 @@ All configurations either have a default or are optional.
 | rblog.pagination.max | 100 | Max page size
 | rblog.categories.autoCreate | true | should categories be created on the fly if missing when creating a post
 | rblog.posts.top.size | 3 | how many posts are shown by category for top endpoint (home page)
-| rblog.sitemap.pageSize | 20 | page size used to generate the sitemap
 | rblog.sitemap.pingUrls |http://www.google.com/webmasters/tools/ping?sitemap=%s,http://www.bing.com/ping?sitemap=%s | ping url(s) when the sitemap is generated and updated
-| rblog.sitemap.base | - | site root url used to send to the ping urls
+| rblog.visitor.pageSize | 20 | page size used to generate the sitemap and RSS feed
+| rblog.visitor.base | - | site root url used to send to the ping urls (sitemap) and to create the rss feed.
 | rblog.security.password.hash_algorithm |SHA-256 | algorithm (MessageDigest) used to hash the passwords
 | rblog.security.password.round_trip | 3 | how many time the hash_algorithm is used to compute the password representation used in the database
 | rblog.token.eviction | PT720H | how often token are evicted (old ones are deleted making them inactive). Default is 30 days, it uses java.time.Duration syntax.

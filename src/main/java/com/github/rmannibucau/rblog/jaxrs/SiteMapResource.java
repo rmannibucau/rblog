@@ -2,6 +2,7 @@ package com.github.rmannibucau.rblog.jaxrs;
 
 import com.github.rmannibucau.rblog.configuration.Configuration;
 import com.github.rmannibucau.rblog.jaxrs.async.Async;
+import com.github.rmannibucau.rblog.jaxrs.dump.VisitorSupport;
 import com.github.rmannibucau.rblog.jpa.Post;
 import com.github.rmannibucau.rblog.security.cdi.Logged;
 import lombok.extern.java.Log;
@@ -18,8 +19,6 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.TransactionManagement;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
 import javax.ws.rs.Path;
@@ -44,14 +43,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -68,22 +65,18 @@ public class SiteMapResource {
     private volatile Urlset sitemap;
 
     @Inject
-    private EntityManager entityManager;
-
-    @Inject
-    @Configuration("${rblog.sitemap.pageSize:20}")
-    private Integer pageSize;
-
-    @Inject
     @Configuration("${rblog.sitemap.pingUrls:http://www.google.com/webmasters/tools/ping?sitemap=%s,http://www.bing.com/ping?sitemap=%s}")
     private String pingUrls;
 
     @Inject
-    @Configuration("rblog.sitemap.base")
-    private String base; // TODO: compute it?
+    @Configuration("${rblog.sitemap.skip:false}")
+    private Boolean skip;
 
     @Resource
     private SessionContext sc;
+
+    @Inject
+    private VisitorSupport visitor;
 
     private Future<?> init;
     private Optional<WebTarget[]> pingTargets;
@@ -104,10 +97,11 @@ public class SiteMapResource {
         };
 
         // prepare ping targets
-        pingTargets = ofNullable(base)
+        pingTargets = ofNullable(visitor.getBase())
+                .filter(b -> !skip)
                 .map(b -> {
                     try {
-                        return URLEncoder.encode(base + "/api/sitemap", "UTF-8");
+                        return URLEncoder.encode(visitor.getBase() + "/api/sitemap", "UTF-8");
                     } catch (final UnsupportedEncodingException e) {
                         return null;
                     }
@@ -127,7 +121,7 @@ public class SiteMapResource {
         url.setChangefreq(TChangeFreq.WEEKLY); // let's assume that for now
         url.setLastmod(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.ofInstant(post.getUpdated().toInstant(), ZoneId.systemDefault())));
         url.setPriority(.5); // TODO: add it in Post table
-        url.setLoc(base + "#!/post/" + post.getSlug());
+        url.setLoc(visitor.buildLink(post));
 
         newMap.getUrl().add(url);
     }
@@ -140,25 +134,7 @@ public class SiteMapResource {
     @Asynchronous
     public Future<?> doGenerate() {
         final Urlset newMap = new Urlset();
-
-        final Date now = new Date();
-        try {
-            final long total = entityManager.createNamedQuery(Post.COUNT_ALL_PUBLISHED, Number.class)
-                    .setParameter("date", now)
-                    .getSingleResult().longValue();
-
-            IntStream.range(0, (int) Math.ceil(total * 1. / pageSize))
-                    .mapToObj(i -> i) // to prepare the next flatMap
-                    .flatMap(page -> entityManager.createNamedQuery(Post.FIND_ALL_PUBLISHED, Post.class)
-                            .setParameter("date", now)
-                            .setFirstResult(page * pageSize)
-                            .setMaxResults(pageSize).getResultList()
-                            .stream())
-                    .forEach(post -> addToMap(newMap, post));
-        } catch (final NoResultException nre) {
-            // ok, means no url
-        }
-
+        visitor.visit(p -> addToMap(newMap, p));
         sitemap = newMap;
         ping();
 

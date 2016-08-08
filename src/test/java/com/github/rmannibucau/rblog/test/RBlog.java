@@ -9,6 +9,10 @@ import com.github.rmannibucau.rblog.service.PasswordService;
 import com.google.common.base.Function;
 import lombok.Getter;
 import org.apache.catalina.Context;
+import org.apache.cxf.Bus;
+import org.apache.cxf.interceptor.LoggingInInterceptor;
+import org.apache.cxf.interceptor.LoggingOutInterceptor;
+import org.apache.openejb.server.cxf.transport.util.CxfUtil;
 import org.apache.openejb.testing.Application;
 import org.apache.openejb.testing.ContainerProperties;
 import org.apache.openejb.testing.RandomPort;
@@ -75,6 +79,11 @@ import static org.junit.Assert.assertEquals;
     // we need to ensure we use the DB the test expects and the test can clean it so ensure it starting from an empty DB
     @ContainerProperties.Property(name = "rblog.provisioning.defaultUser.active", value = "false"),
 
+    // to ensure rss has valid urls
+    @ContainerProperties.Property(name = "rblog.visitor.base", value = "http://localhost:${http.port}/rblog"),
+    @ContainerProperties.Property(name = "rblog.rss.title", value = "RBlog"),
+    @ContainerProperties.Property(name = "rblog.sitemap.skip", value = "true"),
+
     // test == dev
     @ContainerProperties.Property(name = "rblog.environment", value = "dev"),
 
@@ -102,13 +111,13 @@ public class RBlog {
 
     @PostConstruct
     private void initBase() throws MalformedURLException, ServletException {
-        /* for JAXRS debugging
-        final Bus bus = CxfUtil.getBus();
-        bus.getInInterceptors().add(new LoggingInInterceptor());
-        bus.getInFaultInterceptors().add(new LoggingInInterceptor());
-        bus.getOutInterceptors().add(new LoggingOutInterceptor());
-        bus.getOutFaultInterceptors().add(new LoggingOutInterceptor());
-        */
+        if (Boolean.getBoolean("rblog.jaxrs.debug")) {
+            final Bus bus = CxfUtil.getBus();
+            bus.getInInterceptors().add(new LoggingInInterceptor());
+            bus.getInFaultInterceptors().add(new LoggingInInterceptor());
+            bus.getOutInterceptors().add(new LoggingOutInterceptor());
+            bus.getOutFaultInterceptors().add(new LoggingOutInterceptor());
+        }
         baseUrl = base.toExternalForm() + "rblog/";
     }
 
