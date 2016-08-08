@@ -27,7 +27,7 @@ public class VisitorSupport {
     private String base;
 
     public String buildLink(final Post post) {
-        return base + "#!/post/" + post.getSlug();
+        return base + "#/post/" + post.getSlug();
     }
 
     public void visit(final Consumer<Post> consumer) {
