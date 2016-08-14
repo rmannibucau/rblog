@@ -28,7 +28,8 @@ export class Category implements OnDestroy {
           this.analyticsService.track('/category/' + this.slug);
           this.searchOptions = {categorySlug: this.slug};
           this.fetchCategory();
-        })
+        });
+        
     }
 
     ngOnDestroy() {

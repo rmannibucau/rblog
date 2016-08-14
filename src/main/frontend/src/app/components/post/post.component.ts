@@ -1,4 +1,4 @@
-import {Component, AfterViewInit, AfterViewChecked, OnInit } from '@angular/core';
+import {Component, AfterViewInit, AfterViewChecked, OnInit, OnDestroy} from '@angular/core';
 import {DomSanitizationService} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {PostService} from '../../service/post.service';
@@ -6,6 +6,7 @@ import {Twitter} from '../../service/twitter.service';
 import {CKEditorLoader} from '../../service/ckeditor.service';
 import {AnalyticsService} from '../../service/analytics.service';
 import {NotificationService} from '../../service/notification.service';
+import {HtmlMetaService} from '../../service/meta.service';
 
 declare var $: any;
 
@@ -14,7 +15,7 @@ declare var $: any;
   template: require('./post.pug'),
   styles: [require('../../../public/js/lib/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css')]
 })
-export class Post implements AfterViewChecked, AfterViewInit, OnInit {
+export class Post implements AfterViewChecked, AfterViewInit, OnInit, OnDestroy {
     notificationsOptions = {};
     post: any;
     pageUrl: string;
@@ -27,7 +28,8 @@ export class Post implements AfterViewChecked, AfterViewInit, OnInit {
                 private ckEditorLoader: CKEditorLoader,
                 private analyticsService: AnalyticsService,
                 private domSanitizationService : DomSanitizationService,
-                private route: ActivatedRoute) {
+                private route: ActivatedRoute,
+                private meta: HtmlMetaService) {
     }
 
     ngOnInit() {
@@ -38,7 +40,13 @@ export class Post implements AfterViewChecked, AfterViewInit, OnInit {
               this.post = post;
               this.post.content = this.domSanitizationService.bypassSecurityTrustHtml(this.post.content);
               this.refreshView = true;
+              this.meta.update('title', post.title);
+              this.meta.update('description', post.summary);
           }, error => this.notifyService.error('Error', 'Can\'t retrieve post (HTTP ' + error.status + ').'));
+    }
+
+    ngOnDestroy() {
+      ['title', 'description'].forEach(m => this.meta.reset(m));
     }
 
     ngAfterViewInit() {

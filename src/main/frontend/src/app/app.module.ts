@@ -32,6 +32,7 @@ import {UserService} from './service/user.service';
 import {CKEditorLoader} from './service/ckeditor.service';
 import {Twitter} from './service/twitter.service';
 import {AnalyticsService} from './service/analytics.service';
+import {HtmlMetaService} from './service/meta.service';
 
 import {routes} from './app.routes';
 
@@ -65,7 +66,8 @@ import {routes} from './app.routes';
       UserService,
       CKEditorLoader,
       Twitter,
-      AnalyticsService
+      AnalyticsService,
+      HtmlMetaService
     ],
     imports: [
       // app modules
