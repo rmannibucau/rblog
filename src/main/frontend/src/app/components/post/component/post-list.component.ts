@@ -1,11 +1,9 @@
 import {Component, Input, OnChanges, SimpleChange, AfterViewInit} from '@angular/core';
-import {PostSummary} from './post-summary.component';
 import {PostService} from '../../../service/post.service';
 
 @Component({
   selector: 'post-list',
-  template: require('./post-list.pug'),
-  directives: [PostSummary]
+  template: require('./post-list.pug')
 })
 export class PostList implements AfterViewInit {
   @Input() title;

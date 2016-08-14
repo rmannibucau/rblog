@@ -1,15 +1,12 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
-import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
 import {NotificationService} from '../../../service/notification.service';
 
 @Component({
   selector: 'profile',
-  template: require('./profile.pug'),
-  directives: [SimpleNotificationsComponent],
-  providers: [NotificationsService, NotificationService]
+  template: require('./profile.pug')
 })
 export class AdminProfile extends AdminComponent {
     notificationsOptions = {};

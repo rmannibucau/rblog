@@ -63,7 +63,8 @@ export class App implements OnInit, OnDestroy {
   }
 
   private loadCategories() {
-    this.categoryService.findAll().subscribe(cat => this.categories = cat);
+    this.categoryService.findAll().subscribe(
+      cat => this.categories = cat);
   }
 
 	isLogged() {

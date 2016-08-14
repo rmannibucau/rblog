@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {PostService} from '../../service/post.service';
 import {PostSummary} from '../post/component/post-summary.component';
 import {AnalyticsService} from '../../service/analytics.service';
@@ -7,9 +6,7 @@ import {NotificationService} from '../../service/notification.service';
 
 @Component({
   selector: 'home',
-  template: require('./home.pug'),
-  directives: [SimpleNotificationsComponent, PostSummary],
-  providers: [NotificationsService, NotificationService]
+  template: require('./home.pug')
 })
 export class Home {
   data = {};

@@ -1,6 +1,5 @@
 import {Component, OnInit, AfterViewInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
-import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
 import {PostService} from '../../../service/post.service';
@@ -20,9 +19,7 @@ const TWEEK_LINK_LEN = 23;
 
 @Component({
   selector: 'post',
-  template: require('./post.pug'),
-  directives: [SimpleNotificationsComponent],
-  providers: [NotificationsService, NotificationService]
+  template: require('./post.pug')
 })
 export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
     notificationsOptions = {};

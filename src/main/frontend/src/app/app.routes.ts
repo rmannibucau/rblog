@@ -1,5 +1,3 @@
-import {provideRouter, RouterConfig, ROUTER_DIRECTIVES} from '@angular/router';
-
 import {Home} from './components/home/home.component';
 import {Login} from './components/login/login.component';
 import {Logout} from './components/login/login.component';
@@ -15,7 +13,7 @@ import {Post} from './components/post/post.component';
 import {Search} from './components/post/search.component';
 
 export const routes = [
-  {path: '', component: Home /*, useAsDefault: true */},
+  {path: '', component: Home},
   {path: 'login', component: Login},
   {path: 'logout', component: Logout},
   {path: 'admin/category/new', component: AdminCategory},
@@ -30,5 +28,6 @@ export const routes = [
   {path: 'admin/profile', component: AdminProfile},
   {path: 'category/:slug', component: Category},
   {path: 'post/:slug', component: Post},
-  {path: 'search', component: Search}
+  {path: 'search', component: Search},
+  {path: '**', component: Home}
 ];

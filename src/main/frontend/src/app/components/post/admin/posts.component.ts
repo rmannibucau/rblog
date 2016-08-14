@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
-import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
 import {PostService} from '../../../service/post.service';
@@ -8,9 +7,7 @@ import {NotificationService} from '../../../service/notification.service';
 
 @Component({
   selector: 'posts',
-  template: require('./posts.pug'),
-  directives: [SimpleNotificationsComponent],
-  providers: [NotificationsService, NotificationService]
+  template: require('./posts.pug')
 })
 export class AdminPosts extends AdminComponent implements OnInit {
     notificationsOptions = {};

@@ -1,6 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {CategoryService} from '../../service/category.service';
 import {PostService} from '../../service/post.service';
 import {PostList} from '../post/component/post-list.component';
@@ -9,9 +8,7 @@ import {NotificationService} from '../../service/notification.service';
 
 @Component({
   selector: 'category',
-  template: require('./category.pug'),
-  directives: [SimpleNotificationsComponent, PostList],
-  providers: [NotificationsService, NotificationService]
+  template: require('./category.pug')
 })
 export class Category implements OnDestroy {
     notificationsOptions = {};

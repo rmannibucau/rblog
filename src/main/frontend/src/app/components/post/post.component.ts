@@ -1,7 +1,6 @@
 import {Component, AfterViewInit, AfterViewChecked, OnInit } from '@angular/core';
 import {DomSanitizationService} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
-import {NotificationsService, SimpleNotificationsComponent} from 'angular2-notifications/components';
 import {PostService} from '../../service/post.service';
 import {Twitter} from '../../service/twitter.service';
 import {CKEditorLoader} from '../../service/ckeditor.service';
@@ -13,8 +12,6 @@ declare var $: any;
 @Component({
   selector: 'post',
   template: require('./post.pug'),
-  directives: [SimpleNotificationsComponent],
-  providers: [NotificationsService, NotificationService],
   styles: [require('../../../public/js/lib/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css')]
 })
 export class Post implements AfterViewChecked, AfterViewInit, OnInit {
