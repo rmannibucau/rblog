@@ -91,14 +91,15 @@ public class CategoryResource {
     }
 
     @POST
-    @Async
+    @Async(backup = true)
     @Logged
     @Consumes(MediaType.APPLICATION_JSON)
     public void post(final CategoryModel model, @Suspended final AsyncResponse response) {
-        response.resume(findById(create(model).getId()));
+        final CategoryModel byId = findById(create(model).getId());
+        response.resume(byId);
     }
 
-    @Async
+    @Async(backup = true)
     @DELETE
     @Logged
     @Path("{id}")

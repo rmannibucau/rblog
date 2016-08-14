@@ -282,8 +282,8 @@ public class PostResource {
     }
 
     @POST
-    @Async
     @Logged
+    @Async(backup = true)
     @Path("admin")
     @Consumes(MediaType.APPLICATION_JSON)
     public void post(final PostModel model, @Suspended final AsyncResponse response) {
@@ -364,6 +364,7 @@ public class PostResource {
         }
 
         entityManager.flush();
+
         response.resume(findById(post.getId()));
     }
 
@@ -376,7 +377,7 @@ public class PostResource {
     }
 
     @DELETE
-    @Async
+    @Async(backup = true)
     @Logged
     @Path("admin/{id}")
     public void deleteByIdAdmin(@PathParam("id") final long id, @Suspended final AsyncResponse response) {

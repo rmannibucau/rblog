@@ -13,6 +13,7 @@ import com.github.rmannibucau.rblog.jpa.Post;
 import com.github.rmannibucau.rblog.jpa.PostType;
 import com.github.rmannibucau.rblog.jpa.User;
 import com.github.rmannibucau.rblog.security.web.SecurityFilter;
+import com.github.rmannibucau.rblog.service.Backup;
 import com.github.rmannibucau.rblog.service.PasswordService;
 import com.github.rmannibucau.rblog.test.RBlog;
 import org.apache.openejb.testing.Application;
@@ -22,6 +23,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.mail.BodyPart;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeMessage;
 import javax.net.ssl.HttpsURLConnection;
 import javax.persistence.EntityManager;
 import javax.ws.rs.ForbiddenException;
@@ -30,6 +37,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -39,7 +47,10 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
+import static java.lang.Thread.sleep;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toSet;
@@ -48,6 +59,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(RBlog.Runner.class)
 public class PostResourceTest {
@@ -59,6 +71,9 @@ public class PostResourceTest {
 
     @Inject
     private EntityManager entityManager;
+
+    @Inject
+    private Backup backup;
 
     private User[] users;
     private Post[] posts;
@@ -442,6 +457,9 @@ public class PostResourceTest {
         blog.withTempUser((user, token) -> {
             final Date published = new Date();
 
+            backup.reset();
+            int mailNumber = blog.getMail().getReceivedMessages().length;
+
             PostModel model;
             { // create
                 model = blog.target().path("post/admin").request()
@@ -461,6 +479,49 @@ public class PostResourceTest {
                 assertNotNull(model.getUpdated());
                 assertEquals(TimeUnit.MILLISECONDS.toMinutes(published.getTime()), TimeUnit.MILLISECONDS.toMinutes(model.getPublished().getTime()), 2);
                 assertEquals("title", model.getSlug());
+
+                // ensure backup mail was sent
+                boolean mailOk = false;
+                for (int i = 1; i < 10; i++) { // depending tests we can have had other mails so try to find the one we want
+                    mailNumber++;
+                    assertTrue(blog.getMail().waitForIncomingEmail(TimeUnit.SECONDS.toMillis(45), mailNumber));
+                    final MimeMessage mails = blog.getMail().getReceivedMessages()[mailNumber - 1];
+                    assertNotNull(mails);
+                    try {
+                        final Multipart multipart = Multipart.class.cast(mails.getContent());
+                        assertEquals(1, multipart.getCount());
+                        final BodyPart part = multipart.getBodyPart(0);
+                        assertTrue(part.getFileName().startsWith("rblog_"));
+                        assertTrue(part.getFileName().endsWith(".zip"));
+                        try (final ZipInputStream zip = new ZipInputStream(part.getInputStream())) {
+                            final ZipEntry nextEntry = zip.getNextEntry();
+                            assertNotNull(nextEntry);
+                            assertEquals("backup.json", nextEntry.getName());
+
+                            final JsonObject content = Json.createReader(zip).readObject();
+                            final String debug = content.toString();
+                            Stream.of("date", "categories", "posts", "users").forEach(k -> assertTrue(debug, content.containsKey(k)));
+                            Stream.of("posts", "users").forEach(k -> assertEquals(debug, 1, content.getJsonArray(k).size()));
+
+                            final JsonObject u = content.getJsonArray("users").getJsonObject(0);
+                            Stream.of("username", "displayName").forEach(k -> assertEquals(debug, "test", u.getString(k)));
+
+                            final JsonObject p = content.getJsonArray("posts").getJsonObject(0);
+                            assertEquals("Title", p.getString("title"));
+                            assertEquals("Content", p.getString("content"));
+                            assertEquals("Summ", p.getString("summary"));
+                            assertEquals("title", p.getString("slug"));
+                            assertEquals("test", p.getString("author"));
+                        }
+                        mailOk = true;
+                        break;
+                    } catch (final MessagingException | IOException e) {
+                        fail(e.getMessage());
+                    } catch (final AssertionError ae) {
+                        System.out.println("Error, retrying: " + ae.getMessage());
+                    }
+                }
+                assertTrue("mail for post creation was not found", mailOk);
             }
             { // update
                 model.setContent("Content 2");
@@ -483,6 +544,39 @@ public class PostResourceTest {
                 assertNotNull(model.getUpdated());
                 assertEquals(published.getTime() + TimeUnit.MINUTES.toMillis(10), model.getPublished().getTime(), TimeUnit.MINUTES.toMillis(2));
                 assertEquals("title", model.getSlug()); // not recomputed to have permalinks
+
+                mailNumber++;
+                assertTrue(blog.getMail().waitForIncomingEmail(TimeUnit.MINUTES.toMillis(1), mailNumber));
+                final MimeMessage[] receivedMessages = blog.getMail().getReceivedMessages();
+                final MimeMessage mail = receivedMessages[mailNumber - 1];
+                assertNotNull(mail);
+                try {
+                    final Multipart multipart = Multipart.class.cast(mail.getContent());
+                    assertEquals(1, multipart.getCount());
+                    final BodyPart part = multipart.getBodyPart(0);
+                    assertTrue(part.getFileName().startsWith("rblog_"));
+                    assertTrue(part.getFileName().endsWith(".zip"));
+                    try (final ZipInputStream zip = new ZipInputStream(part.getInputStream())) {
+                        final ZipEntry nextEntry = zip.getNextEntry();
+                        assertNotNull(nextEntry);
+                        assertEquals("backup.json", nextEntry.getName());
+
+                        final JsonObject content = Json.createReader(zip).readObject();
+                        final String debug = content.toString();
+                        Stream.of("date", "categories", "posts", "users").forEach(k -> assertTrue(debug, content.containsKey(k)));
+                        Stream.of("posts", "users").forEach(k -> assertEquals(debug, 1, content.getJsonArray(k).size()));
+
+                        final JsonObject u = content.getJsonArray("users").getJsonObject(0);
+                        Stream.of("username", "displayName").forEach(k -> assertEquals(debug, "test", u.getString(k)));
+
+                        final JsonObject p = content.getJsonArray("posts").getJsonObject(0);
+                        assertEquals(debug, "Title 2", p.getString("title"));
+                        assertEquals(debug, "Content 2", p.getString("content"));
+                        assertEquals(debug, "Summ 2", p.getString("summary"));
+                    }
+                } catch (final MessagingException | IOException e) {
+                    fail(e.getMessage());
+                }
             }
             { // update permalink
                 model.setSlug("changed-slug");
@@ -574,7 +668,21 @@ public class PostResourceTest {
                 assertEquals(
                     HttpsURLConnection.HTTP_NO_CONTENT,
                     blog.target().path("post/admin/{id}").resolveTemplate("id", model.getId()).request().header(SecurityFilter.SECURITY_HEADER, token).delete().getStatus());
-                assertNull(entityManager.find(Post.class, model.getId()));
+                for (int i = 0; i < 5; i++) {
+                    try {
+                        assertNull(entityManager.find(Post.class, model.getId()));
+                    } catch (final AssertionError ae) {
+                        if (i == 4) {
+                            throw ae;
+                        }
+                        try {
+                            sleep(500);
+                        } catch (final InterruptedException e) {
+                            Thread.interrupted();
+                            fail(e.getMessage());
+                        }
+                    }
+                }
 
                 // categories are not deleted with rows
                 assertNotNull(entityManager.createQuery("select c from Category c where c.name = :name", Category.class).setParameter("name", "New Category").getSingleResult());

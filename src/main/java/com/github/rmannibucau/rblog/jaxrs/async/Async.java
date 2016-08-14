@@ -15,4 +15,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface Async {
     @Nonbinding
     boolean transactional() default true;
+
+    @Nonbinding
+    boolean backup() default false;
 }

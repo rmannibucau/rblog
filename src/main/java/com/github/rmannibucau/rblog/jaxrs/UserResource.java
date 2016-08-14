@@ -61,7 +61,7 @@ public class UserResource {
     }
 
     @POST
-    @Async
+    @Async(backup = true)
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public void post(final UserModel model, @Suspended final AsyncResponse response) {
@@ -96,7 +96,7 @@ public class UserResource {
     }
 
     @DELETE
-    @Async
+    @Async(backup = true)
     @Path("{id}")
     public void remove(@PathParam("id") final long id, @Suspended final AsyncResponse response) {
         entityManager.remove(entityManager.getReference(User.class, id));

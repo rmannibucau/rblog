@@ -29,6 +29,11 @@ All configurations either have a default or are optional.
 | rblog.angular2.context | / | Workaround for Angular2 rc1. Redirect angular routes to #/route when coming with /route.
 | rblog.bitly.url | https://api-ssl.bitly.com/v3/shorten | Bit.ly endpoint to shorten urls.
 | rblog.bitly.token | - | Bit.ly access_token. If not set Bit.ly feature is not active.
+| rblog.backup.work | ${openejb.base}/work/rblog | Where to dump the blog when a backup is done.
+| rblog.backup.mail.sessionJndi | - | Session JNDI name to send mails on backup.
+| rblog.backup.mail.from | rblog@rblog.com | FROM address used to send mail on backup.
+| rblog.backup.mail.to | - | Recipients address for backups.
+| rblog.backup.mail.subject | RBlog backup | Backup mail subject.
 |===
 
 == Configuration location/format
@@ -77,6 +82,29 @@ posted when the post is published.
 
 If you configure Bit.ly (`token` property, see configuration) you will be able to hit a `Bit.ly` button on the post
 form to automatically retrieve a bit.ly url.
+
+== Mail backup
+
+Often for small or personal blogs the best backup is a mail box (avoid to need a custom server).
+
+When activated configuring `sessionJndi` and `to` properties, that's what will do the backup feature.
+
+NOTE: it needs a valid session configuration, here is a sample for gmail:
+
+[source,xml]
+----
+<Resource id="mail/gmail" type="javax.mail.Session">
+mail.transport.protocol = smtp
+mail.smtp.host = smtp.gmail.com
+mail.smtp.port = 587
+mail.smtp.auth = true
+mail.smtp.starttls.enable = true
+mail.smtp.user = xxxxx
+password = xxxxxx
+</Resource>
+----
+
+Then on tomee you can set `rblog.backup.mail.sessionJndi` to `openejb:Resource/mail/gmail`.
 
 == Possible Enhancements
 

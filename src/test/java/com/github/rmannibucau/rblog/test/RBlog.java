@@ -7,7 +7,12 @@ import com.github.rmannibucau.rblog.security.web.model.Credentials;
 import com.github.rmannibucau.rblog.security.web.model.TokenValue;
 import com.github.rmannibucau.rblog.service.PasswordService;
 import com.google.common.base.Function;
+import com.icegreen.greenmail.store.InMemoryStore;
+import com.icegreen.greenmail.store.MailFolder;
+import com.icegreen.greenmail.util.GreenMail;
+import com.icegreen.greenmail.util.ServerSetup;
 import lombok.Getter;
+import lombok.extern.java.Log;
 import org.apache.catalina.Context;
 import org.apache.cxf.Bus;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
@@ -16,6 +21,7 @@ import org.apache.openejb.server.cxf.transport.util.CxfUtil;
 import org.apache.openejb.testing.Application;
 import org.apache.openejb.testing.ContainerProperties;
 import org.apache.openejb.testing.RandomPort;
+import org.apache.openejb.util.NetworkUtil;
 import org.apache.tomee.embedded.Configuration;
 import org.apache.tomee.embedded.Container;
 import org.apache.tomee.loader.TomcatHelper;
@@ -63,36 +69,50 @@ import java.util.stream.Stream;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertEquals;
 
+@Log
 @ContainerProperties({
-    @ContainerProperties.Property(name = "rblogDataSource", value = "new://Resource?type=DataSource"),
-    @ContainerProperties.Property(name = "rblogDataSource.JdbcDriver", value = "org.h2.Driver"),
-    @ContainerProperties.Property(name = "rblogDataSource.JdbcUrl", value = "jdbc:h2:mem:rblog_test"),
-    // @ContainerProperties.Property(name = "rblog.LogSql", value = "true"),
+        @ContainerProperties.Property(name = "jdbc/rblog", value = "new://Resource?type=DataSource"),
+        @ContainerProperties.Property(name = "jdbc/rblog.JdbcDriver", value = "org.h2.Driver"),
+        @ContainerProperties.Property(name = "jdbc/rblog.JdbcUrl", value = "jdbc:h2:mem:rblog_test;MVCC=true"),
+        // @ContainerProperties.Property(name = "jdbc/rblog.LogSql", value = "true"),
 
-    // don't worry, these are random
-    @ContainerProperties.Property(name = "rblog.twitter.consumerKey", value = "C1245678OUhejdve"),
-    @ContainerProperties.Property(name = "rblog.twitter.consumerSecret", value = "6s4dfzfrr7JGKRFD"),
-    @ContainerProperties.Property(name = "rblog.twitter.token", value = "123486489-frce5s4HIKVFRF"),
-    @ContainerProperties.Property(name = "rblog.twitter.tokenSecret", value = "Jbgjczdkl454fecfregfergf"),
-    @ContainerProperties.Property(name = "rblog.twitter.api.update.url", value = "http://localhost:${http.port}/rblog/api/1.1/statuses/update.json"),
+        // don't worry, these are random
+        @ContainerProperties.Property(name = "rblog.twitter.consumerKey", value = "C1245678OUhejdve"),
+        @ContainerProperties.Property(name = "rblog.twitter.consumerSecret", value = "6s4dfzfrr7JGKRFD"),
+        @ContainerProperties.Property(name = "rblog.twitter.token", value = "123486489-frce5s4HIKVFRF"),
+        @ContainerProperties.Property(name = "rblog.twitter.tokenSecret", value = "Jbgjczdkl454fecfregfergf"),
+        @ContainerProperties.Property(name = "rblog.twitter.api.update.url", value = "http://localhost:${http.port}/rblog/api/1.1/statuses/update.json"),
 
-    // bitly setup
-    @ContainerProperties.Property(name = "rblog.bitly.token", value = "testbitly"),
-    @ContainerProperties.Property(name = "rblog.bitly.url", value = "http://localhost:${http.port}/rblog/api/bitly-mock"),
+        // bitly setup
+        @ContainerProperties.Property(name = "rblog.bitly.token", value = "testbitly"),
+        @ContainerProperties.Property(name = "rblog.bitly.url", value = "http://localhost:${http.port}/rblog/api/bitly-mock"),
 
-    // we need to ensure we use the DB the test expects and the test can clean it so ensure it starting from an empty DB
-    @ContainerProperties.Property(name = "rblog.provisioning.defaultUser.active", value = "false"),
+        // backup
+        //// the session
+        @ContainerProperties.Property(name = "mail/session", value = "new://Resource?type=javax.mail.Session"),
+        @ContainerProperties.Property(name = "mail/session.mail.smtp.host", value = "localhost"),
+        @ContainerProperties.Property(name = "mail/session.mail.smtp.port", value = "${mail.port}"),
+        //// the backup configuration
+        @ContainerProperties.Property(name = "rblog.backup.work", value = "target/rblogbackup"),
+        @ContainerProperties.Property(name = "rblog.backup.mail.to", value = "to@greenmail.com"),
+        @ContainerProperties.Property(name = "rblog.backup.mail.sessionJndi", value = "openejb:Resource/mail/session"),
 
-    // to ensure rss has valid urls
-    @ContainerProperties.Property(name = "rblog.visitor.base", value = "http://localhost:${http.port}/rblog"),
-    @ContainerProperties.Property(name = "rblog.rss.title", value = "RBlog"),
-    @ContainerProperties.Property(name = "rblog.sitemap.skip", value = "true"),
+        // we need to ensure we use the DB the test expects and the test can clean it so ensure it starting from an empty DB
+        @ContainerProperties.Property(name = "rblog.provisioning.defaultUser.active", value = "false"),
 
-    // test == dev
-    @ContainerProperties.Property(name = "rblog.environment", value = "dev"),
+        // to ensure rss has valid urls
+        @ContainerProperties.Property(name = "rblog.visitor.base", value = "http://localhost:${http.port}/rblog"),
+        @ContainerProperties.Property(name = "rblog.rss.title", value = "RBlog"),
+        @ContainerProperties.Property(name = "rblog.sitemap.skip", value = "true"),
 
-    // nicer logging
-    @ContainerProperties.Property(name = "openejb.jul.forceReload", value = "true")
+        // test == dev
+        @ContainerProperties.Property(name = "rblog.environment", value = "dev"),
+
+        // pool for backup each 3s
+        @ContainerProperties.Property(name = "rblog.backup.polling", value = "PT3S"),
+
+        // nicer logging
+        @ContainerProperties.Property(name = "openejb.jul.forceReload", value = "true")
 })
 public class RBlog {
     @RandomPort("http")
@@ -109,6 +129,9 @@ public class RBlog {
 
     @Getter
     private String baseUrl;
+
+    @Getter
+    private GreenMail mail;
 
     private WebDriver webDriver;
     private WebDriverWait waitDriver;
@@ -233,6 +256,7 @@ public class RBlog {
     public void clean() {
         inTx(() -> Stream.of("Token", "Notification", "Category", "Post", "User", "Attachment")
                 .forEach(table -> entityManager.createQuery("delete from " + table).executeUpdate()));
+        cleanMails();
     }
 
     public void executeInAdminContext(final Runnable runnable) {
@@ -280,6 +304,12 @@ public class RBlog {
         elt.clear();
         elt.sendKeys(value);
         */
+    }
+
+    public void cleanMails() {
+        ofNullable(InMemoryStore.class.cast(mail.getManagers().getImapHostManager().getStore()))
+                .map(s -> s.getMailbox("to@greenmail.com"))
+                .ifPresent(MailFolder::deleteAllMessages);
     }
 
     public static class Home {
@@ -362,15 +392,6 @@ public class RBlog {
         private static final AtomicReference<Container> CONTAINER = new AtomicReference<>();
         private static final AtomicReference<Thread> HOOK = new AtomicReference<>();
 
-        public static void close() {
-            final Thread hook = HOOK.get();
-            if (hook != null) {
-                if (HOOK.compareAndSet(hook, null)) {
-                    hook.run();
-                }
-            }
-        }
-
         @Override
         protected List<MethodRule> rules(final Object test) {
             final List<MethodRule> rules = super.rules(test);
@@ -392,15 +413,26 @@ public class RBlog {
                         return;
                     }
 
+                    // start a mail server
+                    final int mailPort = NetworkUtil.getNextAvailablePort();
+                    final GreenMail greenMail = new GreenMail(new ServerSetup(mailPort, "localhost", "smtp"));
+                    greenMail.start();
+                    log.info("Started GreenMail on port " + mailPort);
+
                     // setup the container config reading class annotation, using a randome http port and deploying the classpath
                     final Configuration configuration = new Configuration().randomHttpPort();
                     Stream.of(RBlog.class.getAnnotation(ContainerProperties.class).value())
-                            .forEach(p -> configuration.property(p.name(), p.value().replace("${http.port}", Integer.toString(configuration.getHttpPort()))));
+                            .forEach(p -> configuration.property(p.name(),
+                                    p.value()
+                                            .replace("${mail.port}", Integer.toString(mailPort))
+                                            .replace("${http.port}", Integer.toString(configuration.getHttpPort()))));
                     final Container container = new Container(configuration).deployClasspathAsWebApp("rblog", new File("src/main/frontend/dist"));
                     CONTAINER.compareAndSet(null, container);
+                    log.info("Started TomEE on port " + configuration.getHttpPort());
 
                     // create app helper and inject basic values
                     final RBlog app = new RBlog();
+                    app.mail = greenMail;
                     app.base = new URL("http://localhost:" + configuration.getHttpPort() + "/");
                     app.initBase();
                     APP.set(app);
@@ -409,14 +441,18 @@ public class RBlog {
                     final Thread hook = new Thread() {
                         @Override
                         public void run() {
-                            app.clear();
-                            container.close();
-                            CONTAINER.set(null);
-                            APP.set(null);
                             try {
-                                Runtime.getRuntime().removeShutdownHook(this);
-                            } catch (final Exception e) {
-                                // no-op: that's ok at that moment if not called manually
+                                app.clear();
+                                container.close();
+                                CONTAINER.set(null);
+                                APP.set(null);
+                            } finally {
+                                greenMail.stop();
+                                try {
+                                    Runtime.getRuntime().removeShutdownHook(this);
+                                } catch (final Exception e) {
+                                    // no-op: that's ok at that moment if not called manually
+                                }
                             }
                         }
                     };

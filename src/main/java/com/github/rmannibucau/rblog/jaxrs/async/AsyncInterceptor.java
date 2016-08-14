@@ -1,12 +1,14 @@
 package com.github.rmannibucau.rblog.jaxrs.async;
 
 import com.github.rmannibucau.rblog.configuration.Configuration;
+import com.github.rmannibucau.rblog.event.DoBackup;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.Priority;
 import javax.annotation.Resource;
 import javax.enterprise.concurrent.ManagedExecutorService;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.inject.Inject;
@@ -81,6 +83,9 @@ public class AsyncInterceptor {
         @Inject
         private TransactionProvider transactionProvider;
 
+        @Inject
+        private Event<DoBackup> backup;
+
         private final ConcurrentMap<Method, Meta> metas = new ConcurrentHashMap<>();
 
         Meta find(final Method m) {
@@ -103,7 +108,14 @@ public class AsyncInterceptor {
                 final Parameter[] parameters = mtd.getParameters();
                 for (int i = 0; i < parameters.length; i++) {
                     if (parameters[i].isAnnotationPresent(Suspended.class)) {
-                        return new Meta(async.transactional() ? this::runInTransaction : this::run, i);
+                        final boolean doBackup = async.backup();
+                        final BiConsumer<AsyncResponse, Runnable> invoker = async.transactional() ? this::runInTransaction : this::run;
+                        return new Meta((a, r) -> {
+                            invoker.accept(a, r);
+                            if (doBackup) { // after tx is commited
+                                backup.fire(new DoBackup());
+                            }
+                        }, i);
                     }
                 }
                 throw new IllegalArgumentException("No @Suspended paramter for " + mtd);

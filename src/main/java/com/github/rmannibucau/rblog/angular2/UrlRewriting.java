@@ -21,7 +21,7 @@ import java.io.IOException;
 @WebFilter(asyncSupported = true, urlPatterns = "/*")
 public class UrlRewriting implements Filter {
     @Inject
-    @Configuration("${:false}")
+    @Configuration("${rblog.angular2.context:false}")
     private Boolean active;
 
     @Override
