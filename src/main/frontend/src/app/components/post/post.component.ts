@@ -34,7 +34,6 @@ export class Post implements AfterViewChecked, AfterViewInit, OnInit, OnDestroy 
 
     ngOnInit() {
       const slug = this.route.snapshot.params['slug'];
-      this.analyticsService.track('/post/' + slug);
       this.service.findBySlug(slug).subscribe(
           post => {
               this.post = post;
@@ -42,6 +41,7 @@ export class Post implements AfterViewChecked, AfterViewInit, OnInit, OnDestroy 
               this.refreshView = true;
               this.meta.update('title', post.title);
               this.meta.update('description', post.summary);
+              this.analyticsService.track('/post/' + slug);
           }, error => this.notifyService.error('Error', 'Can\'t retrieve post (HTTP ' + error.status + ').'));
     }
 
