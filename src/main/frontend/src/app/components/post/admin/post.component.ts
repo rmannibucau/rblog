@@ -7,6 +7,7 @@ import {CategoryService} from '../../../service/category.service';
 import {UserService} from '../../../service/user.service';
 import {CKEditorLoader} from '../../../service/ckeditor.service';
 import {NotificationService} from '../../../service/notification.service';
+import {BitlyService} from '../../../service/bitly.service';
 
 declare var $: any;
 declare var CKEDITOR: any;
@@ -33,12 +34,15 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
     categories = [];
     users = [];
     viewInit = false;
+    bitlyLink: string;
+    bitlyIsActive: boolean = false;
 
     constructor(private postService: PostService,
                 private userService: UserService,
                 private categoryService: CategoryService,
                 private ckEditorLoader: CKEditorLoader,
                 private notifyService: NotificationService,
+                private bitlyService: BitlyService,
                 router: Router,
                 route: ActivatedRoute,
                 securityService: SecurityService) {
@@ -50,6 +54,9 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
       this.categoryService.findAll().subscribe(
           categories => this.categories = categories,
           error => this.notifyService.error('Error', 'Can\'t retrieve categories (HTTP ' + error.status + ').'));
+      this.bitlyService.isActive().subscribe(
+        active => this.bitlyIsActive = active,
+        error => this.notifyService.error('Error', 'Can\'t retrieve Bit.ly integration (HTTP ' + error.status + ').'));
 
       const postId = this.route.snapshot.params['id'];
       if (postId) {
@@ -83,6 +90,16 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
         this.initEditor();
       }
       this.viewInit = true;
+    }
+
+    shortenUrl() {
+      if (!this.formData['slug']) {
+        this.notifyService.error('No slug', 'Can\'t shorten an url without a slug set).')
+        return;
+      }
+      this.bitlyService.shorten(this.slugBaseUrl + this.formData['slug']).subscribe(
+        link => this.bitlyLink = link,
+        error => this.notifyService.error('Error', 'Can\'t retrieve Bit.ly integration (HTTP ' + error.status + ').'))
     }
 
     fetchUsers(selectOne) {

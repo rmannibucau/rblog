@@ -33,6 +33,7 @@ import {CKEditorLoader} from './service/ckeditor.service';
 import {Twitter} from './service/twitter.service';
 import {AnalyticsService} from './service/analytics.service';
 import {HtmlMetaService} from './service/meta.service';
+import {BitlyService} from './service/bitly.service';
 
 import {routes} from './app.routes';
 
@@ -67,7 +68,8 @@ import {routes} from './app.routes';
       CKEditorLoader,
       Twitter,
       AnalyticsService,
-      HtmlMetaService
+      HtmlMetaService,
+      BitlyService
     ],
     imports: [
       // app modules

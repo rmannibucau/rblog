@@ -76,6 +76,10 @@ import static org.junit.Assert.assertEquals;
     @ContainerProperties.Property(name = "rblog.twitter.tokenSecret", value = "Jbgjczdkl454fecfregfergf"),
     @ContainerProperties.Property(name = "rblog.twitter.api.update.url", value = "http://localhost:${http.port}/rblog/api/1.1/statuses/update.json"),
 
+    // bitly setup
+    @ContainerProperties.Property(name = "rblog.bitly.token", value = "testbitly"),
+    @ContainerProperties.Property(name = "rblog.bitly.url", value = "http://localhost:${http.port}/rblog/api/bitly-mock"),
+
     // we need to ensure we use the DB the test expects and the test can clean it so ensure it starting from an empty DB
     @ContainerProperties.Property(name = "rblog.provisioning.defaultUser.active", value = "false"),
 

@@ -6,6 +6,7 @@ import com.github.rmannibucau.rblog.service.URLService;
 import lombok.Getter;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.enterprise.context.ApplicationScoped;
@@ -15,6 +16,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +32,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
 @ApplicationScoped
@@ -74,6 +78,7 @@ public class TwitterService implements SocialService {
     private WebTarget updateTarget;
     private byte[] signingKey;
     private String signingStringConstantPrefix;
+    private Client client;
 
     @PostConstruct
     private void prepareClient() {
@@ -81,11 +86,22 @@ public class TwitterService implements SocialService {
             return;
         }
 
-        final Client client = ClientBuilder.newBuilder().build();
+        client = ClientBuilder.newBuilder().build();
         updateTarget = client.target(updateEndpoint);
 
         signingKey = (urlService.percentEncode(consumerSecret) + '&' + urlService.percentEncode(tokenSecret)).getBytes(StandardCharsets.UTF_8);
         signingStringConstantPrefix = "POST&" + urlService.percentEncode(updateEndpoint) + "&";
+    }
+
+    @PreDestroy
+    private void destroy() {
+        ofNullable(client).filter(Closeable.class::isInstance).ifPresent(c -> {
+            try {
+                Closeable.class.cast(c).close();
+            } catch (final IOException e) {
+                // no-op
+            }
+        });
     }
 
     @Override

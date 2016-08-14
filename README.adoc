@@ -27,6 +27,8 @@ All configurations either have a default or are optional.
 | rblog.twitter.consumerSecret | - | Twitter consumer secret to use for notifications.
 | rblog.twitter.api.update.url | https://api.twitter.com/1.1/statuses/update.json | Twitter endpoint to use to send the notification.
 | rblog.angular2.context | / | Workaround for Angular2 rc1. Redirect angular routes to #/route when coming with /route.
+| rblog.bitly.url | https://api-ssl.bitly.com/v3/shorten | Bit.ly endpoint to shorten urls.
+| rblog.bitly.token | - | Bit.ly access_token. If not set Bit.ly feature is not active.
 |===
 
 == Configuration location/format
@@ -65,6 +67,16 @@ alter table rblog_post modify content mediumtext;
 # whatever fits your need, number of chars
 org.apache.johnzon.max-string-length = 655360
 ----
+
+== Social networks integration
+
+Today RBlog supports Twitter integration. When you create a post you can define a tweet and schedule it to be
+posted when the post is published.
+
+== Bit.ly integration
+
+If you configure Bit.ly (`token` property, see configuration) you will be able to hit a `Bit.ly` button on the post
+form to automatically retrieve a bit.ly url.
 
 == Possible Enhancements
 

@@ -13,6 +13,9 @@ div.align-center.container
                     div
                         span {{slugBaseUrl}}
                         input(id="postSlug", type="text", placeholder="Enter the post slug...", [(ngModel)]="formData.slug", maxlength="255", name="slug").form-control.inline-input
+                        span.hspace
+                        button(*ngIf="bitlyIsActive", (click)="shortenUrl();$event.preventDefault();").btn.btn-primary.btn-xs Bit.ly it!
+                        span(*ngIf="bitlyIsActive") {{bitlyLink}}
                 div.form-group
                     label(for="postEditor") Your content
                     textarea(id="postEditor", [(ngModel)]="formData.content", name="content")
