@@ -11,5 +11,6 @@ if (isProd) {
   enableProdMode();
 }
 
+// TODO: move to ngc when webpack will get a released ngc-loader
 platformBrowserDynamic()
   .bootstrapModule(AppModule);

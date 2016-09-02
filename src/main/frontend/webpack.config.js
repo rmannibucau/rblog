@@ -33,6 +33,7 @@ module.exports = function() {
     },
     resolve: {
       cache: !isDev,
+      mainFields: ["module", "main", "browser"],
       root: root(),
       extensions: ['', '.ts', '.js', '.css', '.html', '.pug'],
       alias: {
@@ -67,7 +68,7 @@ module.exports = function() {
   if (!isDev) {
     config.plugins.push(
       new webpack.NoErrorsPlugin(),
-      new webpack.optimize.DedupePlugin(),
+      // new webpack.optimize.DedupePlugin(),
       new webpack.optimize.UglifyJsPlugin({
         beautify: false,
         comments: false,

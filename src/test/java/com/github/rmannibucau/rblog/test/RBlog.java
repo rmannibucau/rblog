@@ -76,6 +76,9 @@ import static org.junit.Assert.assertEquals;
         @ContainerProperties.Property(name = "jdbc/rblog.JdbcUrl", value = "jdbc:h2:mem:rblog_test;MVCC=true"),
         // @ContainerProperties.Property(name = "jdbc/rblog.LogSql", value = "true"),
 
+        // work around
+        @ContainerProperties.Property(name = "rblog.jaxrs.async", value = "false"),
+
         // don't worry, these are random
         @ContainerProperties.Property(name = "rblog.twitter.consumerKey", value = "C1245678OUhejdve"),
         @ContainerProperties.Property(name = "rblog.twitter.consumerSecret", value = "6s4dfzfrr7JGKRFD"),

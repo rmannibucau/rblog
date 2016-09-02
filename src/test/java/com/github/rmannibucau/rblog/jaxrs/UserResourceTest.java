@@ -3,6 +3,7 @@ package com.github.rmannibucau.rblog.jaxrs;
 import com.github.rmannibucau.rblog.jaxrs.model.UserModel;
 import com.github.rmannibucau.rblog.jpa.User;
 import com.github.rmannibucau.rblog.security.web.SecurityFilter;
+import com.github.rmannibucau.rblog.service.Backup;
 import com.github.rmannibucau.rblog.test.RBlog;
 import org.apache.openejb.testing.Application;
 import org.junit.After;
@@ -11,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import javax.inject.Inject;
 import javax.net.ssl.HttpsURLConnection;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.client.Entity;
@@ -29,10 +31,19 @@ public class UserResourceTest {
     @Application
     private RBlog blog;
 
+    @Inject
+    private Backup.Internal backup;
+
     @Before
+    public void noMail() {
+        backup.setDynamicActive(false);
+        blog.clean();
+    }
+
     @After
     public void clean() {
         blog.clean();
+        backup.setDynamicActive(true);
     }
 
     @Test

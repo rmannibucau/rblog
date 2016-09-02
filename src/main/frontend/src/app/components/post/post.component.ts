@@ -1,5 +1,5 @@
 import {Component, AfterViewInit, AfterViewChecked, OnInit, OnDestroy} from '@angular/core';
-import {DomSanitizationService} from '@angular/platform-browser';
+import {DomSanitizer} from '@angular/platform-browser';
 import {ActivatedRoute} from '@angular/router';
 import {PostService} from '../../service/post.service';
 import {Twitter} from '../../service/twitter.service';
@@ -27,7 +27,7 @@ export class Post implements AfterViewChecked, AfterViewInit, OnInit, OnDestroy 
                 private twitter: Twitter,
                 private ckEditorLoader: CKEditorLoader,
                 private analyticsService: AnalyticsService,
-                private domSanitizationService : DomSanitizationService,
+                private domSanitizationService : DomSanitizer,
                 private route: ActivatedRoute,
                 private meta: HtmlMetaService) {
     }

@@ -5,6 +5,7 @@ import com.github.rmannibucau.rblog.event.DoBackup;
 import com.github.rmannibucau.rblog.jpa.Category;
 import com.github.rmannibucau.rblog.jpa.Post;
 import com.github.rmannibucau.rblog.jpa.User;
+import lombok.Setter;
 import lombok.extern.java.Log;
 
 import javax.activation.DataHandler;
@@ -148,6 +149,9 @@ public class Backup {
         private JsonGeneratorFactory generatorFactory;
         private Session session;
 
+        @Setter // mainly for testing or through JVM scripting
+        private volatile boolean dynamicActive = true;
+
         @PostConstruct
         private void init() {
             if (isActive()) {
@@ -162,7 +166,8 @@ public class Backup {
 
         @Transactional
         public void doBackup() {
-            final File out = new File(workDir, "backup_" + System.currentTimeMillis() + ".json");
+            final long start = System.currentTimeMillis();
+            final File out = new File(workDir, "backup_" + start + ".json");
             out.getParentFile().mkdirs();
 
             // using streaming (pagination for JPA) to not load the whole DB in memory
@@ -245,7 +250,7 @@ public class Backup {
 
             try {
                 sendMail(out);
-                log.info("Backup mail sent.");
+                log.info("Backup mail sent (created in " + (System.currentTimeMillis() - start) + " ms).");
             } catch (final MessagingException e) {
                 throw new IllegalStateException(e);
             } finally {
@@ -256,7 +261,7 @@ public class Backup {
         }
 
         public boolean isActive() {
-            return sessionJndi != null && to != null;
+            return dynamicActive && sessionJndi != null && to != null;
         }
 
         private void sendMail(final File out) throws MessagingException {

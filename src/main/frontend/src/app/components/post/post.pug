@@ -5,7 +5,7 @@ div(*ngIf="post").align-center.row
           em Created on {{ fixDate(post.published || post.created) | date:'fullDate' }} by {{ post.author?.displayName }}
       a(href="https://twitter.com/intent/tweet", data-via="rmannibucau", [attr.data-text]="post.title", [attr.data-url]="pageUrl", data-size="large").twitter-share-button.pull-right
       p(id="postContent", [innerHTML]="post.content")
-    duv.vspace &nbsp;
+    div.vspace &nbsp;
     div
       div(*ngIf="post.categories && post.categories.length > 0").col-sm-6
         a([routerLink]="['/category/', post.categories[0].slug]", href="#").pull-right

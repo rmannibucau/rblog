@@ -77,8 +77,9 @@ public class ConfigurationProducer {
         final int colon = val.indexOf(':');
         final boolean hasDefault = val.startsWith("${") && val.endsWith("}") && colon > 0;
         final String key = hasDefault ? val.substring("${".length(), colon) : val;
-        return decryptIfNeeded(ofNullable(values.get(key)).orElseGet(() -> hasDefault ? val.substring(colon + 1, val.length() - 1) : null))
-                .replace("${openejb.base}", System.getProperty("openejb.base", ""));
+        return ofNullable(decryptIfNeeded(ofNullable(values.get(key)).orElseGet(() -> hasDefault ? val.substring(colon + 1, val.length() - 1) : null)))
+                .map(s -> s.replace("${openejb.base}", System.getProperty("openejb.base", "")))
+                .orElse(null);
     }
 
     @Produces

@@ -86,6 +86,10 @@ public class AsyncInterceptor {
         @Inject
         private Event<DoBackup> backup;
 
+        @Inject
+        @Configuration("${rblog.jaxrs.async:true}")
+        private Boolean useAsync; // see https://issues.apache.org/jira/browse/CXF-7037
+
         private final ConcurrentMap<Method, Meta> metas = new ConcurrentHashMap<>();
 
         Meta find(final Method m) {
@@ -123,7 +127,12 @@ public class AsyncInterceptor {
         }
 
         private void run(final AsyncResponse response, final Runnable task) {
-            executorService.submit(toJaxRs(response, task));
+            final Runnable runnable = toJaxRs(response, task);
+            if (useAsync) {
+                executorService.submit(runnable);
+            } else {
+                runnable.run();
+            }
         }
 
         private void runInTransaction(final AsyncResponse response, final Runnable task) {
