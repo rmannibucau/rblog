@@ -12,7 +12,7 @@ import {NotificationService} from '../../../service/notification.service';
 export class AdminPosts extends AdminComponent implements OnInit {
     notificationsOptions = {};
     page = 0;
-    pageSize = 25;
+    pageSize = 10;
     hasNext = false;
     hasPrevious = false;
     filterText: string;
