@@ -54,10 +54,13 @@ public class BitlyService {
     }
 
     public String bitlyize(final String toShorten) {
-        final BitlyResponse response = target.queryParam("access_token", token)
-                .queryParam("longUrl", encode(toShorten))
-                .request(APPLICATION_JSON_TYPE)
-                .get(BitlyResponse.class);
+        final BitlyResponse response;
+        synchronized (target) {
+            response = target.queryParam("access_token", token)
+                    .queryParam("longUrl", encode(toShorten))
+                    .request(APPLICATION_JSON_TYPE)
+                    .get(BitlyResponse.class);
+        }
         if (response.getStatus_code() != HttpURLConnection.HTTP_OK) {
             throw new IllegalArgumentException("Bad response from bitly: " + response);
         }

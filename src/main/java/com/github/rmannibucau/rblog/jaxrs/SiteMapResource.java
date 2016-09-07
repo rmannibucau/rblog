@@ -8,6 +8,7 @@ import com.github.rmannibucau.rblog.security.cdi.Logged;
 import lombok.extern.java.Log;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
@@ -43,6 +44,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -80,6 +82,7 @@ public class SiteMapResource {
 
     private Future<?> init;
     private Optional<WebTarget[]> pingTargets;
+    private final Collection<Runnable> destroys = new ArrayList<>();
 
     @PostConstruct
     private void init() {
@@ -92,7 +95,11 @@ public class SiteMapResource {
 
             @Override
             public Client get() {
-                return c == null ? (c = ClientBuilder.newBuilder().build()) : c;
+                if (c == null) {
+                    c = ClientBuilder.newBuilder().build();
+                    destroys.add(() -> c.close());
+                }
+                return c;
             }
         };
 
@@ -114,6 +121,11 @@ public class SiteMapResource {
                         .map(url -> lazyClient.get().target(url))
                         .toArray(WebTarget[]::new))
                 .filter(targets -> targets.length > 0);
+    }
+
+    @PreDestroy
+    private void destroy() {
+        destroys.forEach(Runnable::run);
     }
 
     private void addToMap(final Urlset newMap, final Post post) {
@@ -142,11 +154,14 @@ public class SiteMapResource {
     }
 
     private void ping() {
-        pingTargets.ifPresent(targets ->
+        pingTargets.ifPresent(targets -> {
+            synchronized (targets) {
                 Stream.of(targets)
                         .map(target -> target.request().get().getStatus())
                         .filter(status -> status != HttpURLConnection.HTTP_OK)
-                        .forEach(badStatus -> log.warning("Got HTTP " + badStatus + " pinging one of " + pingUrls)));
+                        .forEach(badStatus -> log.warning("Got HTTP " + badStatus + " pinging one of " + pingUrls));
+            }
+        });
     }
 
     @GET

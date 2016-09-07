@@ -120,10 +120,13 @@ public class TwitterService implements SocialService {
     @Override
     public CompletableFuture<?> publish(final String message) {
         final JaxRsPromise jaxRsPromise = new JaxRsPromise();
-        final Future<?> future = updateTarget.request()
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .header("Authorization", buildAuthorizationHeader(singletonMap("status", message))).async()
-                .post(Entity.entity("status=" + urlService.percentEncode(message), MediaType.APPLICATION_FORM_URLENCODED), jaxRsPromise.toJaxRsCallback());
+        final Future<?> future;
+        synchronized (updateTarget) {
+            future = updateTarget.request()
+                    .accept(MediaType.APPLICATION_JSON_TYPE)
+                    .header("Authorization", buildAuthorizationHeader(singletonMap("status", message))).async()
+                    .post(Entity.entity("status=" + urlService.percentEncode(message), MediaType.APPLICATION_FORM_URLENCODED), jaxRsPromise.toJaxRsCallback());
+        }
         return jaxRsPromise.propagateCancel(future).toFuture();
     }
 
