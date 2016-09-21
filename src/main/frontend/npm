@@ -1,0 +1,6 @@
+#! /bin/bash
+
+node_install=~/.rblog-build/node-installation-dir/
+PATH="$node_install/node/":$PATH
+node "$node_install/node/node_modules/npm/bin/npm-cli.js" "$@"
+
