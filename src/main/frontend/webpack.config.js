@@ -18,8 +18,6 @@ var rootPath = '';
 module.exports = function() {
   var config = {
     devtool: 'source-map',
-    debug: isDev,
-    includeFilenames: isDev,
     entry: {
      'polyfills': './src/polyfills.ts',
      'vendor': './src/vendor.ts',
@@ -32,10 +30,9 @@ module.exports = function() {
       chunkFilename: !isDev ? '[id].[hash].chunk.js' : '[id].chunk.js'
     },
     resolve: {
-      cache: !isDev,
+      unsafeCache: !isDev,
       mainFields: ["module", "main", "browser"],
-      root: root(),
-      extensions: ['', '.ts', '.js', '.css', '.html', '.pug'],
+      extensions: ['.ts', '.js', '.css', '.html', '.pug'],
       alias: {
         'app': 'src/app',
         'jquery': 'jquery/dist/jquery',
@@ -49,7 +46,6 @@ module.exports = function() {
         {test: /\.html$/, loader: 'raw'},
         {test: /\.css$/, loader: 'raw'}
       ],
-      postLoaders: [],
       noParse: [/.+zone\.js\/dist\/.+/, /.+angular2\/bundles\/.+/, /angular2-polyfills\.js/]
     }
   };
@@ -62,7 +58,9 @@ module.exports = function() {
     new HtmlWebpackPlugin({ template: './src/public/index.html', inject: 'body', chunksSortMode: function sort(a, b) {
         return chunks.indexOf(b.names[0]) - chunks.indexOf(a.names[0]); // reverse order
       }
-    })
+    }),
+    // avoid warnings: "Critical dependency: the request of a dependency is an expression"
+    new webpack.ContextReplacementPlugin(/angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/, root('./src'))
   ];
 
   if (!isDev) {
@@ -88,12 +86,6 @@ module.exports = function() {
   }
 
   config.plugins.push(new CopyWebpackPlugin([{ from: root('src/public') }]));
-
-  config.postcss = [
-    autoprefixer({
-      browsers: ['last 2 version']
-    })
-  ];
 
   return config;
 }();

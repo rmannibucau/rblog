@@ -9,7 +9,7 @@ export class Twitter {
   lazyLoad() {
     this.dpl.onAccepted(() => {
       !function(d,s,id){
-        var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';
+        var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location.protocol)?'http':'https';
         if(!d.getElementById(id)) {
           js=d.createElement(s);
           js.id=id;

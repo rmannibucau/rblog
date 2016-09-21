@@ -7,7 +7,7 @@ export class DataProtectionLaw {
     accepted: boolean = false;
 
     constructor() {
-        this.accepted = Cookie.getCookie(this.cookieName) == 'accepted';
+        this.accepted = Cookie.get(this.cookieName) == 'accepted';
     }
 
     onAccepted(cb) {
@@ -20,7 +20,7 @@ export class DataProtectionLaw {
 
     onAccept() {
         this.callbacksOnAccept.forEach(c => c());
-        Cookie.setCookie(this.cookieName, "accepted");
+        Cookie.set(this.cookieName, "accepted");
         this.accepted = true;
     }
 
@@ -30,6 +30,6 @@ export class DataProtectionLaw {
     }
 
     reset() {
-        Cookie.deleteCookie(this.cookieName);
+        Cookie.delete(this.cookieName);
     }
 }

@@ -7,12 +7,12 @@ import '@angular/router';
 import '@angular/http';
 import '@angular/forms';
 
-// RxJS
-import 'rxjs';
-
 // Angular plugins
-import 'ng2-cookies/ng2-cookies';
+import 'ng2-cookies';
 import 'angular2-notifications/components';
+
+// rx
+import 'rxjs';
 
 // jQuery
 import 'jquery';
