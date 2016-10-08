@@ -34,6 +34,7 @@ import {Twitter} from './service/twitter.service';
 import {AnalyticsService} from './service/analytics.service';
 import {HtmlMetaService} from './service/meta.service';
 import {BitlyService} from './service/bitly.service';
+import {BackupService} from './service/backup.service';
 
 import {routes} from './app.routes';
 
@@ -69,7 +70,8 @@ import {routes} from './app.routes';
       Twitter,
       AnalyticsService,
       HtmlMetaService,
-      BitlyService
+      BitlyService,
+      BackupService
     ],
     imports: [
       // app modules

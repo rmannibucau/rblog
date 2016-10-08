@@ -1,6 +1,5 @@
 package com.github.rmannibucau.rblog.jaxrs;
 
-import com.github.rmannibucau.rblog.jaxrs.BitlyResource;
 import com.github.rmannibucau.rblog.security.web.SecurityFilter;
 import com.github.rmannibucau.rblog.test.RBlog;
 import org.apache.openejb.testing.Application;

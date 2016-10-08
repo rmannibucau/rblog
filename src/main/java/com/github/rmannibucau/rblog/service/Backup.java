@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -160,18 +161,14 @@ public class Backup {
                 } catch (final NamingException e) {
                     throw new IllegalArgumentException(e);
                 }
-                generatorFactory = Json.createGeneratorFactory(emptyMap());
             }
+            // needed for backup endpoint anyway
+            generatorFactory = Json.createGeneratorFactory(emptyMap());
         }
 
-        @Transactional
-        public void doBackup() {
-            final long start = System.currentTimeMillis();
-            final File out = new File(workDir, "backup_" + start + ".json");
-            out.getParentFile().mkdirs();
-
-            // using streaming (pagination for JPA) to not load the whole DB in memory
-            try (final JsonGenerator generator = generatorFactory.createGenerator(new ZipOutputStream(new FileOutputStream(out)) {
+        @Transactional // using streaming (pagination for JPA) to not load the whole DB in memory
+        public void write(final OutputStream out) {
+            try (final JsonGenerator generator = generatorFactory.createGenerator(new ZipOutputStream(out) {
                 {
                     super.setLevel(Deflater.BEST_COMPRESSION);
 
@@ -242,6 +239,17 @@ public class Backup {
                 generator.writeEnd();
 
                 generator.writeEnd();
+            }
+        }
+
+        @Transactional
+        public void doBackup() {
+            final long start = System.currentTimeMillis();
+            final File out = new File(workDir, "backup_" + start + ".json");
+            out.getParentFile().mkdirs();
+
+            try {
+                write(new FileOutputStream(out));
             } catch (final FileNotFoundException e) {
                 throw new IllegalStateException(e);
             }

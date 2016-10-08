@@ -15,6 +15,10 @@ var compileEnv = process.env.APP_ENV || 'prod';
 var isDev = compileEnv == 'dev';
 var rootPath = '';
 
+console.log('Webpack build in ' + (isDev ? 'dev' : 'prod')  + ' mode');
+console.log('');
+console.log('');
+
 module.exports = function() {
   var config = {
     devtool: 'source-map',
@@ -40,11 +44,11 @@ module.exports = function() {
       }
     },
     module: {
-      loaders: [
-        {test: /\.ts$/, loader: 'ts', exclude: [/node_modules\/(?!(ng2-.+))/]},
-        {test: /\.pug$/, loader: 'pug-html-loader'},
-        {test: /\.html$/, loader: 'raw'},
-        {test: /\.css$/, loader: 'raw'}
+      rules: [
+        {test: /\.ts$/, use:{loader: 'ts'}, exclude: [/node_modules\/(?!(ng2-.+))/]},
+        {test: /\.pug$/, use:{loader: 'pug-html-loader'}},
+        {test: /\.html$/, use:{loader: 'raw'}},
+        {test: /\.css$/, use:{loader: 'raw'}}
       ],
       noParse: [/.+zone\.js\/dist\/.+/, /.+angular2\/bundles\/.+/, /angular2-polyfills\.js/]
     }
@@ -55,6 +59,7 @@ module.exports = function() {
     new webpack.ProvidePlugin({ $: 'jquery', jQuery: 'jquery', 'window.$': 'jquery', 'window.jQuery': 'jquery' }),
     new webpack.DefinePlugin({ 'process.env': { 'compileEnv': "'" + compileEnv + "'" } }),
     new CommonsChunkPlugin({ name: chunks, minChunks: Infinity }),
+    new CopyWebpackPlugin([{ from: root('src/public') }]), // before next one otherwise index.html can miss injections
     new HtmlWebpackPlugin({ template: './src/public/index.html', inject: 'body', chunksSortMode: function sort(a, b) {
         return chunks.indexOf(b.names[0]) - chunks.indexOf(a.names[0]); // reverse order
       }
@@ -84,8 +89,6 @@ module.exports = function() {
       })
     );
   }
-
-  config.plugins.push(new CopyWebpackPlugin([{ from: root('src/public') }]));
 
   return config;
 }();

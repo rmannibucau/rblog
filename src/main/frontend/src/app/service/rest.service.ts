@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {Http, Headers, RequestOptions} from '@angular/http';
+import {Http, Headers, RequestOptions, ResponseContentType} from '@angular/http';
 
 const base = 'api/';
 
@@ -20,11 +20,16 @@ export class RestClient {
         return this.http.head(base + endpoint, new RequestOptions({headers: this.sharedHeaders}));
     }
 
+    getRaw(endpoint, type) {
+        let opts = {headers: this.sharedHeaders};
+        if (type) {
+          opts['responseType'] = type;
+        }
+        return this.http.get(base + endpoint, new RequestOptions(opts));
+    }
+
     get(endpoint) {
-        return this.http.get(base + endpoint, new RequestOptions({headers: this.sharedHeaders}))
-        .map(r => {
-            return r.json();
-          });
+        return this.getRaw(endpoint, undefined).map(r => r.json());
     }
 
     delete(endpoint) {
