@@ -28,7 +28,7 @@ public class BackupResourceTest {
     private RBlog blog;
 
     @Test
-    public void isActive() {
+    public void download() {
         blog.withTempUser((id, token) -> {
             final File file = new File("target/BackupResourceTest" + System.nanoTime() + ".zip");
             try (final InputStream in = blog.target().path("backup")
