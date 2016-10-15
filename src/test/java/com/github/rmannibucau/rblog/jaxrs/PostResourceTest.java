@@ -223,12 +223,12 @@ public class PostResourceTest {
                 posts.getRows().stream().map(PostModel::getId).collect(toSet()),
                 Stream.of(this.posts).map(Post::getId).collect(toSet()));
         });
-        blog.withTempUser((u, token) -> { // all have # in the content
+        blog.withTempUser((u, token) -> { // all have bla in the title
             final PostPage posts = blog.target()
                 .path("post/select")
                 .queryParam("type", "all")
                 .queryParam("orderBy", "title")
-                .queryParam("search", "#")
+                .queryParam("search", "bla")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .header(SecurityFilter.SECURITY_HEADER, token)
                 .get(PostPage.class);
@@ -237,12 +237,12 @@ public class PostResourceTest {
                 posts.getRows().stream().map(PostModel::getId).collect(toSet()),
                 Stream.of(this.posts).map(Post::getId).collect(toSet()));
         });
-        blog.withTempUser((u, token) -> { // only one has #5
+        blog.withTempUser((u, token) -> { // only one has 5
             final PostPage posts = blog.target()
                 .path("post/select")
                 .queryParam("type", "all")
                 .queryParam("orderBy", "title")
-                .queryParam("search", "#5")
+                .queryParam("search", "5")
                 .request(MediaType.APPLICATION_JSON_TYPE)
                 .header(SecurityFilter.SECURITY_HEADER, token)
                 .get(PostPage.class);

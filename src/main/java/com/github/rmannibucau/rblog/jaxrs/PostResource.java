@@ -78,7 +78,7 @@ public class PostResource {
             "none", "id", "title", "slug", "type", "created", "updated", "publishDate", "author.displayName"));
     private static final Collection<String> POSSIBLE_ORDER = new HashSet<>(asList("asc", "desc", "none"));
     private static final Collection<String> POSSIBLE_STATUS = new HashSet<>(asList("unpublished", "published"));
-    private static final String[] SEARCH_FIELDS = {"title", "summary", "content"};
+    private static final String[] SEARCH_FIELDS = {"title", "summary", "slug"/*, "content" */};
 
     @Inject
     private EntityManager entityManager;
