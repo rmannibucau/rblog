@@ -115,7 +115,8 @@ import static org.junit.Assert.assertEquals;
         @ContainerProperties.Property(name = "rblog.backup.polling", value = "PT3S"),
 
         // nicer logging
-        @ContainerProperties.Property(name = "openejb.jul.forceReload", value = "true")
+        @ContainerProperties.Property(name = "openejb.jul.forceReload", value = "true"),
+        @ContainerProperties.Property(name = "openejb.cdi.debug", value = "true")
 })
 public class RBlog {
     @RandomPort("http")

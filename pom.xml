@@ -15,7 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <tomee.version>7.0.1</tomee.version>
+    <tomee.version>7.0.2</tomee.version>
     <selenium.version>2.53.1</selenium.version>
 
     <frontend.installDirectory>${user.home}/.rblog-build/node-installation-dir</frontend.installDirectory>
@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.16.6</version>
+      <version>1.16.10</version>
       <scope>provided</scope>
     </dependency>
     <dependency> <!-- not strictly needed but makes tooling smoother cause of PersistenceCapable usage -->
@@ -51,7 +51,7 @@
     <dependency> <!-- for custom date format + lombok integration -->
       <groupId>org.apache.johnzon</groupId>
       <artifactId>johnzon-jaxrs</artifactId>
-      <version>0.9.3-incubating</version>
+      <version>0.9.5</version>
       <scope>provided</scope>
     </dependency>
 
