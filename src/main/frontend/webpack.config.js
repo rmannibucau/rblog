@@ -45,10 +45,10 @@ module.exports = function() {
     },
     module: {
       rules: [
-        {test: /\.ts$/, use:{loader: 'ts'}, exclude: [/node_modules\/(?!(ng2-.+))/]},
+        {test: /\.ts$/, use:{loader: 'ts-loader'}, exclude: [/node_modules\/(?!(ng2-.+))/]},
         {test: /\.pug$/, use:{loader: 'pug-html-loader'}},
-        {test: /\.html$/, use:{loader: 'raw'}},
-        {test: /\.css$/, use:{loader: 'raw'}}
+        {test: /\.html$/, use:{loader: 'raw-loader'}},
+        {test: /\.css$/, use:{loader: 'raw-loader'}}
       ],
       noParse: [/.+zone\.js\/dist\/.+/, /.+angular2\/bundles\/.+/, /angular2-polyfills\.js/]
     }
