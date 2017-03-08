@@ -77,7 +77,7 @@ import {routes} from './app.routes';
       // app modules
       PostModule,
       // angular2-notifications
-      SimpleNotificationsModule,
+      SimpleNotificationsModule.forRoot(),
       // angular built-in modules
       BrowserModule,
       FormsModule,

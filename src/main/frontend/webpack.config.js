@@ -36,7 +36,7 @@ module.exports = function() {
     resolve: {
       unsafeCache: !isDev,
       mainFields: ["module", "main", "browser"],
-      extensions: ['.ts', '.js', '.css', '.html', '.pug'],
+      extensions: ['.js', '.ts', '.css', '.html', '.pug'],
       alias: {
         'app': 'src/app',
         'jquery': 'jquery/dist/jquery',
@@ -45,7 +45,7 @@ module.exports = function() {
     },
     module: {
       rules: [
-        {test: /\.ts$/, use:{loader: 'ts-loader'}, exclude: [/node_modules\/(?!(ng2-.+))/]},
+        {test: /\.ts$/, use:{loader: 'ts-loader'}},
         {test: /\.pug$/, use:{loader: 'pug-html-loader'}},
         {test: /\.html$/, use:{loader: 'raw-loader'}},
         {test: /\.css$/, use:{loader: 'raw-loader'}}

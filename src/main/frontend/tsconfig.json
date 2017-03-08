@@ -8,13 +8,20 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "strictNullChecks": false,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    "types": ["node"],
+    "lib": [
+      "es5",
+      "es2015.iterable",
+      "es2015.collection",
+      "es2015.promise",
+      "dom"
+    ]
   },
   "exclude": [
     "node_modules",
     "dist",
-    "typings/main",
-    "typings/main.d.ts"
+    "**/*.d.ts"
   ],
   "compileOnSave": false,
   "buildOnSave": false,

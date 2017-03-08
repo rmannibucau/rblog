@@ -7,10 +7,14 @@ import {AppModule} from './app/app.module';
 const ENV_PROVIDERS = [];
 const isProd = process.env.compileEnv != 'dev';
 if (isProd) {
-  disableDebugTools();
   enableProdMode();
 }
 
 // TODO: move to ngc when webpack will get a released ngc-loader
 platformBrowserDynamic()
-  .bootstrapModule(AppModule);
+  .bootstrapModule(AppModule)
+  .then(m => {
+    if (isProd) {
+      disableDebugTools();
+    }
+  });
