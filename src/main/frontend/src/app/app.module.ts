@@ -1,5 +1,6 @@
 import {NgModule} from '@angular/core';
 import {BrowserModule } from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {HttpModule} from '@angular/http';
@@ -80,6 +81,7 @@ import {routes} from './app.routes';
       SimpleNotificationsModule.forRoot(),
       // angular built-in modules
       BrowserModule,
+      BrowserAnimationsModule,
       FormsModule,
       HttpModule,
       RouterModule.forRoot(routes, { useHash: true })
