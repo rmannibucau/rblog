@@ -1,5 +1,5 @@
 import {Injectable, OnInit} from '@angular/core';
-import {NotificationsService} from 'angular2-notifications/components';
+import {NotificationsService} from 'angular2-notifications';
 
 declare var $: any;
 

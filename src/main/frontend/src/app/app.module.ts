@@ -4,7 +4,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {FormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {HttpModule} from '@angular/http';
-import {SimpleNotificationsModule} from 'angular2-notifications/components';
+import {SimpleNotificationsModule} from 'angular2-notifications';
 
 import {App}   from './app';
 import {PostModule}   from './components/post/component/post.module';

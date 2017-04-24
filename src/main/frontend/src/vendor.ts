@@ -10,7 +10,7 @@ import '@angular/forms';
 
 // Angular plugins
 import 'ng2-cookies';
-import 'angular2-notifications/components';
+import 'angular2-notifications';
 
 // rx
 import 'rxjs';
