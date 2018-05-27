@@ -1,5 +1,6 @@
 {
   "name": "app",
+  "description": "RBlog frontend build file",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -21,8 +22,8 @@
     "core-js": "2.4.1",
     "rxjs": "5.0.2",
     "zone.js": "0.8.4",
-    "jquery": "2.2.3",
-    "jquery-ui": "1.10.5",
+    "jquery": "3.3.1",
+    "jquery-ui-bundle": "1.12.1-migrate",
     "ckeditor": "4.5.8",
     "ng2-cookies": "1.0.12",
     "angular2-notifications": "0.7.2",
@@ -45,7 +46,7 @@
     "style-loader": "0.13.0",
     "ts-loader": "2.0.3",
     "typescript": "2.3.0",
-    "webpack": "2.1.0-beta.28",
+    "webpack": "2.2.1",
     "pug": "2.0.0-beta.12"
   }
 }

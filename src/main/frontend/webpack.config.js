@@ -40,7 +40,7 @@ module.exports = function() {
       alias: {
         'app': 'src/app',
         'jquery': 'jquery/dist/jquery',
-        'jquery-ui': 'jquery-ui/jquery-ui'
+        'jquery-ui': 'jquery-ui-bundle/jquery-ui.min.js'
       }
     },
     module: {
