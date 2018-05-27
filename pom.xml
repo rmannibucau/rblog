@@ -15,7 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <tomee.version>7.0.2</tomee.version>
+    <tomee.version>7.0.4</tomee.version>
     <selenium.version>2.53.1</selenium.version>
 
     <frontend.installDirectory>${user.home}/.rblog-build/node-installation-dir</frontend.installDirectory>
