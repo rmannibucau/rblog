@@ -1,11 +1,26 @@
 package com.github.rmannibucau.rblog.jaxrs;
 
-import com.github.rmannibucau.rblog.configuration.Configuration;
-import com.github.rmannibucau.rblog.jaxrs.async.Async;
-import com.github.rmannibucau.rblog.jaxrs.dump.VisitorSupport;
-import com.github.rmannibucau.rblog.jpa.Post;
-import com.github.rmannibucau.rblog.security.cdi.Logged;
-import lombok.extern.java.Log;
+import static java.util.Optional.ofNullable;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.stream.Collectors.joining;
+import static javax.ejb.TransactionManagementType.BEAN;
+
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URLEncoder;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -37,25 +52,14 @@ import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static javax.ejb.TransactionManagementType.BEAN;
+import com.github.rmannibucau.rblog.configuration.Configuration;
+import com.github.rmannibucau.rblog.jaxrs.async.Async;
+import com.github.rmannibucau.rblog.jaxrs.dump.VisitorSupport;
+import com.github.rmannibucau.rblog.jpa.Post;
+import com.github.rmannibucau.rblog.security.cdi.Logged;
+
+import lombok.extern.java.Log;
 
 @Log
 @Path("sitemap")
@@ -83,6 +87,7 @@ public class SiteMapResource {
     private Future<?> init;
     private Optional<WebTarget[]> pingTargets;
     private final Collection<Runnable> destroys = new ArrayList<>();
+    private final ZoneId gmt = ZoneId.of("GMT");;
 
     @PostConstruct
     private void init() {
@@ -113,7 +118,7 @@ public class SiteMapResource {
                         return null;
                     }
                 })
-                .filter(u -> u != null)
+                .filter(Objects::nonNull)
                 .map(u -> Stream.of(pingUrls.split(" *, *"))
                         .map(String::trim)
                         .filter(pu -> !pu.isEmpty())
@@ -131,7 +136,7 @@ public class SiteMapResource {
     private void addToMap(final Urlset newMap, final Post post) {
         final TUrl url = new TUrl();
         url.setChangefreq(TChangeFreq.WEEKLY); // let's assume that for now
-        url.setLastmod(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.ofInstant(post.getUpdated().toInstant(), ZoneId.systemDefault())));
+        url.setLastmod(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.ofInstant(post.getUpdated().toInstant(), gmt)));
         url.setPriority(.5); // TODO: add it in Post table
         url.setLoc(visitor.buildLink(post));
 
@@ -169,7 +174,7 @@ public class SiteMapResource {
     @Produces(MediaType.APPLICATION_XML)
     public void get(@Suspended final AsyncResponse response) {
         tryToEnsureSomeData();
-        response.resume(sitemap);
+        response.resume(toXml(sitemap));
     }
 
     @HEAD
@@ -179,11 +184,28 @@ public class SiteMapResource {
         doGenerate();
     }
 
+    // avoid jaxb namespacing
+    private String toXml(final Urlset sitemap) {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                "<urlset\n" +
+                "      xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"\n" +
+                "      xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                "      xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9\n" +
+                "            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">\n" +
+                sitemap.getUrl().stream().map(it -> "<url>\n" +
+                        "  <loc>" + it.getLoc() + "</loc>\n" +
+                        "  <lastmod>" + it.getLastmod() + "</lastmod>\n" +
+                        "  <priority>" + it.getPriority() + "</priority>\n" +
+                        "  <changefreq>" + it.getChangefreq().value() + "</changefreq>\n" +
+                        "</url>\n").collect(joining("\n")) +
+                "</urlset>";
+    }
+
     private void tryToEnsureSomeData() {
         try {
             init.get(1, MINUTES);
         } catch (final InterruptedException e) {
-            Thread.interrupted();
+            Thread.currentThread().interrupt();
         } catch (final ExecutionException | TimeoutException e) {
             // let's return what we have, likely null but don't block more!
         }
@@ -286,8 +308,7 @@ public class SiteMapResource {
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(propOrder = "url", namespace = "http://www.sitemaps.org/schemas/sitemap/0.9")
-    @XmlRootElement(name = "urlset")
+    @XmlRootElement(name = "urlset", namespace = "http://www.sitemaps.org/schemas/sitemap/0.9")
     public static class Urlset {
         @XmlElement(required = true, namespace = "http://www.sitemaps.org/schemas/sitemap/0.9")
         private List<TUrl> url;

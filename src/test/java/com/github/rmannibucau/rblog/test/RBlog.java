@@ -114,6 +114,9 @@ import static org.junit.Assert.assertEquals;
         // pool for backup each 3s
         @ContainerProperties.Property(name = "rblog.backup.polling", value = "PT3S"),
 
+        // this contains java 9 code so exclude it for the current min tomee version
+        @ContainerProperties.Property(name = "openejb.additional.exclude", value = "lombok"),
+
         // nicer logging
         @ContainerProperties.Property(name = "openejb.jul.forceReload", value = "true"),
         @ContainerProperties.Property(name = "openejb.cdi.debug", value = "true")

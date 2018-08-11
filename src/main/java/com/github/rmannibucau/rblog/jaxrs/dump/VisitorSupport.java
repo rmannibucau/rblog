@@ -38,7 +38,7 @@ public class VisitorSupport {
                     .getSingleResult().longValue();
 
             IntStream.range(0, (int) Math.ceil(total * 1. / pageSize))
-                    .mapToObj(i -> i) // to prepare the next flatMap
+                    .boxed() // to prepare the next flatMap
                     .flatMap(page -> entityManager.createNamedQuery(Post.FIND_ALL_PUBLISHED, Post.class)
                             .setParameter("date", now)
                             .setFirstResult(page * pageSize)

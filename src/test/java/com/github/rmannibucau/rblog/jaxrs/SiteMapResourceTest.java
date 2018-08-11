@@ -74,7 +74,7 @@ public class SiteMapResourceTest {
             assertEquals(SiteMapResource.TChangeFreq.WEEKLY, url.getChangefreq());
 
             assertNotNull(url.getLastmod());
-            DateTimeFormatter.ISO_DATE_TIME.parse(url.getLastmod()); // to ensure it is parsable
+            DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(url.getLastmod()); // to ensure it is parsable
 
             assertEquals(0.5, url.getPriority(), 0.);
 
