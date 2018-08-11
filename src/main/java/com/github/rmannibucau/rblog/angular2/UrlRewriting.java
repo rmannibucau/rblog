@@ -1,8 +1,7 @@
 package com.github.rmannibucau.rblog.angular2;
 
-import com.github.rmannibucau.rblog.configuration.Configuration;
+import java.io.IOException;
 
-import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -11,41 +10,32 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import javax.servlet.http.HttpServletRequestWrapper;
 
-// WARNING: this is a quick workaround for ROOT deployment cause of Angular. If not fixed in Angular will need a js monkey fix.
-//
-// https://github.com/angular/angular/issues/8498
-// note this filter only work for root webapp, for others you would need to hack ROOT one to redirect properly.
 @WebFilter(asyncSupported = true, urlPatterns = "/*")
 public class UrlRewriting implements Filter {
-    @Inject
-    @Configuration("${rblog.angular2.context:false}")
-    private Boolean active;
-
     @Override
-    public void init(final FilterConfig filterConfig) throws ServletException {
+    public void init(final FilterConfig filterConfig) {
         // no-op
     }
 
     @Override
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-        if (!active) {
-            chain.doFilter(request, response);
-            return;
-        }
-
         final HttpServletRequest httpServletRequest = HttpServletRequest.class.cast(request);
         final String uri = httpServletRequest.getRequestURI().substring(httpServletRequest.getContextPath().length());
         if (isIncluded(uri)) {
-            HttpServletResponse.class.cast(response).sendRedirect(httpServletRequest.getContextPath() + "/#" + uri);
+            chain.doFilter(new HttpServletRequestWrapper(httpServletRequest) {
+                @Override
+                public String getServletPath() {
+                    return "/index.html";
+                }
+            }, response);
             return;
         }
         chain.doFilter(request, response);
     }
 
-    private boolean isIncluded(final String uri) { // see app.ts
+    private boolean isIncluded(final String uri) { // see app.routes.ts
         return uri.startsWith("/login") || uri.startsWith("/logout") ||
                 uri.startsWith("/category/") || uri.startsWith("/post/") || uri.startsWith("/search") ||
                 uri.startsWith("/admin/");

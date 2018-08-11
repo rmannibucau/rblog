@@ -1,5 +1,34 @@
 package com.github.rmannibucau.rblog.test;
 
+import static java.util.Optional.ofNullable;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.enterprise.inject.Vetoed;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.servlet.ServletException;
+import javax.transaction.SystemException;
+import javax.transaction.UserTransaction;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+
 import com.github.rmannibucau.rblog.jaxrs.provider.JSonProvider;
 import com.github.rmannibucau.rblog.jpa.Token;
 import com.github.rmannibucau.rblog.jpa.User;
@@ -11,8 +40,7 @@ import com.icegreen.greenmail.store.InMemoryStore;
 import com.icegreen.greenmail.store.MailFolder;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
-import lombok.Getter;
-import lombok.extern.java.Log;
+
 import org.apache.catalina.Context;
 import org.apache.cxf.Bus;
 import org.apache.cxf.interceptor.LoggingInInterceptor;
@@ -40,34 +68,8 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.inject.Vetoed;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.servlet.ServletException;
-import javax.transaction.SystemException;
-import javax.transaction.UserTransaction;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import java.io.File;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static java.util.Optional.ofNullable;
-import static org.junit.Assert.assertEquals;
+import lombok.Getter;
+import lombok.extern.java.Log;
 
 @Log
 @ContainerProperties({
@@ -84,11 +86,11 @@ import static org.junit.Assert.assertEquals;
         @ContainerProperties.Property(name = "rblog.twitter.consumerSecret", value = "6s4dfzfrr7JGKRFD"),
         @ContainerProperties.Property(name = "rblog.twitter.token", value = "123486489-frce5s4HIKVFRF"),
         @ContainerProperties.Property(name = "rblog.twitter.tokenSecret", value = "Jbgjczdkl454fecfregfergf"),
-        @ContainerProperties.Property(name = "rblog.twitter.api.update.url", value = "http://localhost:${http.port}/rblog/api/1.1/statuses/update.json"),
+        @ContainerProperties.Property(name = "rblog.twitter.api.update.url", value = "http://localhost:${http.port}/api/1.1/statuses/update.json"),
 
         // bitly setup
         @ContainerProperties.Property(name = "rblog.bitly.token", value = "testbitly"),
-        @ContainerProperties.Property(name = "rblog.bitly.url", value = "http://localhost:${http.port}/rblog/api/bitly-mock"),
+        @ContainerProperties.Property(name = "rblog.bitly.url", value = "http://localhost:${http.port}/api/bitly-mock"),
 
         // backup
         //// the session
@@ -104,7 +106,7 @@ import static org.junit.Assert.assertEquals;
         @ContainerProperties.Property(name = "rblog.provisioning.defaultUser.active", value = "false"),
 
         // to ensure rss has valid urls
-        @ContainerProperties.Property(name = "rblog.visitor.base", value = "http://localhost:${http.port}/rblog"),
+        @ContainerProperties.Property(name = "rblog.visitor.base", value = "http://localhost:${http.port}"),
         @ContainerProperties.Property(name = "rblog.rss.title", value = "RBlog"),
         @ContainerProperties.Property(name = "rblog.sitemap.skip", value = "true"),
 
@@ -152,7 +154,7 @@ public class RBlog {
             bus.getOutInterceptors().add(new LoggingOutInterceptor());
             bus.getOutFaultInterceptors().add(new LoggingOutInterceptor());
         }
-        baseUrl = base.toExternalForm() + "rblog/";
+        baseUrl = base.toExternalForm();
     }
 
     @PreDestroy
@@ -187,7 +189,7 @@ public class RBlog {
 
     public void goTo(final String page) {
         final WebDriver browser = browser();
-        browser.get(baseUrl + "#" + ofNullable(page).orElse(""));
+        browser.get(baseUrl + ofNullable(page).map(it -> it.startsWith("/") ? it.substring(1) : it).orElse(""));
         browser.manage().window().maximize();
     }
 
@@ -341,10 +343,13 @@ public class RBlog {
         public WebElement errors;
 
         public void login(final RBlog blog, final String user, final String pwd) {
-            blog.setInputText(login, user);
-            blog.setInputText(password, pwd);
-            assertEquals(user, login.getAttribute("value"));
-            assertEquals(pwd, password.getAttribute("value"));
+            int retry = 60;
+            do {
+                blog.setInputText(login, user);
+            } while (!ofNullable(login.getAttribute("value")).orElse("").equals(user) && retry-- > 0);
+            do {
+                blog.setInputText(password, pwd);
+            } while (!ofNullable(password.getAttribute("value")).orElse("").equals(pwd) && retry-- > 0);
             submit.click();
         }
     }
@@ -433,7 +438,7 @@ public class RBlog {
                                     p.value()
                                             .replace("${mail.port}", Integer.toString(mailPort))
                                             .replace("${http.port}", Integer.toString(configuration.getHttpPort()))));
-                    final Container container = new Container(configuration).deployClasspathAsWebApp("rblog", new File("src/main/frontend/dist"));
+                    final Container container = new Container(configuration).deployClasspathAsWebApp("", new File("src/main/frontend/dist"));
                     CONTAINER.compareAndSet(null, container);
                     log.info("Started TomEE on port " + configuration.getHttpPort());
 

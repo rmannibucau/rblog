@@ -90,7 +90,7 @@ public class TwitterServiceTest {
         try {
             twitterService.publish("IGNORE TEST TWEET: #withHandle // cc #javaee ?&\"è_ç('éà') => http://localhost.test#/post/super-post").get();
         } catch (final InterruptedException e) {
-            Thread.interrupted();
+            Thread.currentThread().interrupt();
             fail();
         } catch (final ExecutionException e) {
             final StringWriter writer = new StringWriter();
@@ -107,7 +107,7 @@ public class TwitterServiceTest {
             final Mac mac = Mac.getInstance(key.getAlgorithm());
             mac.init(key);
             return urlService.percentEncode(Base64.getEncoder().encodeToString(mac.doFinal(
-                ("POST&http%3A%2F%2Flocalhost%3A" + blog.getHttpPort() + "%2Frblog%2Fapi%2F1.1%2Fstatuses%2Fupdate.json&" +
+                ("POST&http%3A%2F%2Flocalhost%3A" + blog.getHttpPort() + "%2Fapi%2F1.1%2Fstatuses%2Fupdate.json&" +
                     "oauth_consumer_key%3DC1245678OUhejdve%26oauth_nonce%3Dzfcfrjflefnjl%26" +
                     "oauth_signature_method%3DHMAC-SHA1%26oauth_timestamp%3D123456789%26" +
                     "oauth_token%3D123486489-frce5s4HIKVFRF%26" +

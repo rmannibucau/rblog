@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Http, Headers, RequestOptions, ResponseContentType} from '@angular/http';
 
-const base = 'api/';
+const base = '/api/';
 
 @Injectable()
 export class RestClient {

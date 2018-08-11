@@ -166,6 +166,7 @@
               <includes>
                 <include>**/webapp/*.class</include>
               </includes>
+              <skip>true</skip> <!-- requires localstorage to work but seems chrome has a bug -->
             </configuration>
           </execution>
         </executions>
@@ -261,7 +262,7 @@
         <artifactId>tomee-maven-plugin</artifactId>
         <version>${tomee.version}</version>
         <configuration>
-          <context>/${project.artifactId}</context>
+          <context>ROOT</context>
         </configuration>
       </plugin>
       <plugin>

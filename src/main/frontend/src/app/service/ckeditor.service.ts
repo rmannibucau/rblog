@@ -5,7 +5,7 @@ export class CKEditorLoader {
   hljs: any;
 
   constructor() {
-    window['CKEDITOR_BASEPATH'] = '//' + window.location.host + window.location.pathname + 'js/lib/ckeditor/';
+    window['CKEDITOR_BASEPATH'] = window.location.origin + '/js/lib/ckeditor/';
   }
 
   loadIfNeededAndExecute(task: Function) {
@@ -14,7 +14,7 @@ export class CKEditorLoader {
       return;
     }
 
-    $.getScript('js/lib/ckeditor/ckeditor.js', () => {
+    $.getScript('/js/lib/ckeditor/ckeditor.js', () => {
       task();
       this.loaded = true;
     });
@@ -25,12 +25,12 @@ export class CKEditorLoader {
     if (!this.hljs) {
       $.ajax({
         type: "GET",
-        url: 'js/lib/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js',
+        url: '/js/lib/ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js',
         success: () => {
           $('<link/>', {
              rel: 'stylesheet',
              type: 'text/css',
-             href: 'js/lib/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css'
+             href: '/js/lib/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css'
           }).appendTo('head');
 
           self.hljs = window['hljs'];

@@ -91,6 +91,6 @@ public class RssResourceTest {
 
         assertTrue(url.getDescription().startsWith("Sum post "));
         assertTrue(url.getTitle().startsWith("New post "));
-        assertTrue(url.getLink().substring(0, url.getLink().length() - 1).endsWith("#/post/new-post-"));
+        assertTrue(url.getLink().substring(0, url.getLink().length() - 1).endsWith("/post/new-post-"));
     }
 }

@@ -47,7 +47,7 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
                 route: ActivatedRoute,
                 securityService: SecurityService) {
       super(router, route, securityService);
-      this.slugBaseUrl = window.location.href.replace(/#.*/, '') + '#/post/';
+      this.slugBaseUrl = window.location.origin + '/post/';
     }
 
     ngOnInit() {

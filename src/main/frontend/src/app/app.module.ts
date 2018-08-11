@@ -84,7 +84,7 @@ import {routes} from './app.routes';
       BrowserAnimationsModule,
       FormsModule,
       HttpModule,
-      RouterModule.forRoot(routes, { useHash: true })
+      RouterModule.forRoot(routes, { useHash: false })
     ]
 })
 export class AppModule {

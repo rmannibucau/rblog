@@ -14,9 +14,10 @@ export class SecurityService {
 
 
     constructor(private http: RestClient) {
-      const token = localStorage.getItem(HEADER);
+      const token = window.localStorage.getItem(HEADER);
+      window.localStorage.getItem(USERNAME); // chrome workaround to have refreshes working
       if (token) {
-          this.initToken(localStorage.getItem(USERNAME), token, false);
+          this.initToken(window.localStorage.getItem(USERNAME), token, false);
       }
       this.lifecycleListener = new Observable<boolean>(o => this.lifecycleEmitter = o)
           .startWith(this.internalIsLogged())
@@ -27,8 +28,8 @@ export class SecurityService {
         this.http.setHeader(HEADER, token);
         this.username = username;
         if (store) {
-            localStorage.setItem(HEADER, token);
-            localStorage.setItem(USERNAME, username);
+            window.localStorage.setItem(HEADER, token);
+            window.localStorage.setItem(USERNAME, username);
         }
     }
 
@@ -51,8 +52,8 @@ export class SecurityService {
 
     invalidate() {
         this.username = null;
-        localStorage.removeItem(HEADER);
-        localStorage.removeItem(USERNAME);
+        window.localStorage.removeItem(HEADER);
+        window.localStorage.removeItem(USERNAME);
         this.http.removeHeader(HEADER);
         this.lifecycleEmitter.next(false);
     }
@@ -62,10 +63,10 @@ export class SecurityService {
     }
 
     getUsername() {
-        return !this.internalIsLogged() ? localStorage.getItem(USERNAME) || this.username : undefined;
+        return !this.internalIsLogged() ? window.localStorage.getItem(USERNAME) || this.username : undefined;
     }
 
     private internalIsLogged() {
-        return !!localStorage.getItem(HEADER);
+        return !!window.localStorage.getItem(HEADER);
     }
 }

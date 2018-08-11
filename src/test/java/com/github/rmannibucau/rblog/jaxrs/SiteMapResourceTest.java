@@ -78,7 +78,7 @@ public class SiteMapResourceTest {
 
             assertEquals(0.5, url.getPriority(), 0.);
 
-            assertTrue(url.getLoc().substring(0, url.getLoc().length() - 1).endsWith("#/post/new-post-"));
+            assertTrue(url.getLoc().substring(0, url.getLoc().length() - 1).endsWith("/post/new-post-"));
         });
     }
 }
