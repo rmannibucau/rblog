@@ -94,7 +94,7 @@ public class SocialNotifier {
         private EntityManager entityManager;
 
         public void prepareNotify(final List<Notification> notifications) {
-            notifications.stream().forEach(notification -> moveToState(notification, Notification.State.PUBLISHING));
+            notifications.forEach(notification -> moveToState(notification, Notification.State.PUBLISHING));
         }
 
         public CompletableFuture<?>[] doNotify(final SocialService[] activeServices, final List<Notification> notifications) {

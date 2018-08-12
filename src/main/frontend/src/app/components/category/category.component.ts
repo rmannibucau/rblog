@@ -12,7 +12,7 @@ import {NotificationService} from '../../service/notification.service';
 })
 export class Category implements OnDestroy {
     notificationsOptions = {};
-    slug: string;
+    id: string;
     category = {};
     searchOptions: any;
 
@@ -24,9 +24,9 @@ export class Category implements OnDestroy {
                 private analyticsService: AnalyticsService,
                 private route: ActivatedRoute) {
         this.sub = this.route.params.subscribe(params => {
-          this.slug = params['slug']
-          this.analyticsService.track('/category/' + this.slug);
-          this.searchOptions = {categorySlug: this.slug};
+          this.id = params['categoryId']
+          this.analyticsService.track('/category/' + params['slug'] + '/' + this.id);
+          this.searchOptions = {categoryId: this.id};
           this.fetchCategory();
         });
         
@@ -37,7 +37,7 @@ export class Category implements OnDestroy {
     }
 
     fetchCategory() {
-      this.service.findBySlug(this.slug)
+      this.service.findById(this.id)
         .subscribe(
             category => this.category = category,
             error => this.notifyService.error('Error', 'Can\'t retrieve category (HTTP ' + error.status + ').'));

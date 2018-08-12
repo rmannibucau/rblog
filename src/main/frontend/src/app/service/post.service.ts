@@ -45,6 +45,7 @@ export class PostService {
                 .append('status', request.status)
                 .append('search', request.search)
                 .append('categorySlug', request.categorySlug)
+                .append('categoryId', request.categoryId)
                 .build());
     }
 

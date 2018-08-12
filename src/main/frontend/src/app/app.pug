@@ -21,7 +21,7 @@ div(id="mainWrapper")
                     li.hidden
                     //- TODO: handle subcategories
                     li(*ngFor="let category of categories")
-                      a([routerLink]="['/category', category.slug ]", href="#")
+                      a([routerLink]="['/category', category.slug, category.id ]", href="#")
                         | {{ category.name }}
                         span([style.background]="category.color || 'inherit'").category-menu-color &nbsp;
                 ul.nav.navbar-nav.navbar-right

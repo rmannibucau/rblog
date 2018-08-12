@@ -109,7 +109,7 @@ public class CategoryTest {
             return new long[] { post.getId(), category.getId() };
         });
         try {
-            blog.goTo("/category/post-category");
+            blog.goTo("/category/post-category/" + ids[0]);
             blog.waitUntil(() -> blog.isDisplayed(post));
             assertEquals("http://localhost:" + blog.getHttpPort() + "/post/the-title", post.findElement(By.tagName("a")).getAttribute("href"));
         } finally {

@@ -26,7 +26,7 @@ export const routes = [
   {path: 'admin/user/:id', component: AdminUser},
   {path: 'admin/users', component: AdminUsers},
   {path: 'admin/profile', component: AdminProfile},
-  {path: 'category/:slug', component: Category},
+  {path: 'category/:slug/:categoryId', component: Category},
   {path: 'post/:slug', component: Post},
   {path: 'search', component: Search},
   {path: '**', component: Home}
