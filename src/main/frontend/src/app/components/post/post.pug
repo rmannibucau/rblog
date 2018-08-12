@@ -1,5 +1,5 @@
 div(*ngIf="post").align-center.row
-    h2(id="postTitle") {{ post.title }}
+    h1(id="postTitle") {{ post.title }}
     div
       p
           em Created on {{ fixDate(post.published || post.created) | date:'fullDate' }} by {{ post.author?.displayName }}
