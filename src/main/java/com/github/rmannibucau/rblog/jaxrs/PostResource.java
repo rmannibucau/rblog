@@ -154,6 +154,7 @@ public class PostResource {
                          @QueryParam("search") final String search,
                          @QueryParam("categoryId") final long categoryId,
                          @QueryParam("categorySlug") final String categorySlug,
+                         @QueryParam("light") @DefaultValue("false") final boolean light,
                          @Context final SecurityContext securityContext,
                          @Suspended final AsyncResponse response) {
         if (max > maxLimit) {
@@ -182,8 +183,8 @@ public class PostResource {
         final Collection<Predicate> countPredicates = new ArrayList<>();
 
         if (categoryId > 0 || categorySlug != null) { // select p from Post p join  p.categories c where c.slug = :s
-            final Join<Post, Category> categories = root.join("categories", JoinType.INNER);
-            final Join<Post, Category> countCategories = countRoot.join("categories", JoinType.INNER);
+            final javax.persistence.criteria.Path<Object> categories = root.get("categories");
+            final javax.persistence.criteria.Path<Object> countCategories = countRoot.get("categories");
             if (categoryId > 0) {
                 predicates.add(builder.equal(categories.get("id"), categoryId));
                 countPredicates.add(builder.equal(countCategories.get("id"), categoryId));
@@ -268,7 +269,7 @@ public class PostResource {
 
         final List<PostModel> items = entityManager.createQuery(select)
                 .setMaxResults(max).setFirstResult(offset).getResultList().stream()
-                .map(p -> map(p, false))
+                .map(p -> map(p, light))
                 .collect(toList());
 
         long total;

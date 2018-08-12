@@ -193,6 +193,21 @@ public class PostResourceTest {
     }
 
     @Test
+    public void findByCategoryId() {
+        createMultiplePosts();
+        blog.withTempUser((u, token) -> {
+            final PostPage posts = blog.target()
+                .path("post/select")
+                .queryParam("type", "all")
+                .queryParam("categoryId", categories[0].getId())
+                .request(MediaType.APPLICATION_JSON_TYPE)
+                .header(SecurityFilter.SECURITY_HEADER, token)
+                .get(PostPage.class);
+            assertEquals(2, posts.getTotal());
+        });
+    }
+
+    @Test
     public void getAll() {
         createMultiplePosts();
         final Date now = new Date();

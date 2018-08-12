@@ -26,7 +26,7 @@ export class Category implements OnDestroy {
         this.sub = this.route.params.subscribe(params => {
           this.id = params['categoryId']
           this.analyticsService.track('/category/' + params['slug'] + '/' + this.id);
-          this.searchOptions = {categoryId: this.id};
+          this.searchOptions = {categoryId: this.id, light: true};
           this.fetchCategory();
         });
         
