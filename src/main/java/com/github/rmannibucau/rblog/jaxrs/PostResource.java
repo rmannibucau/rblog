@@ -13,7 +13,6 @@ import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -115,7 +114,7 @@ public class PostResource {
     @GET
     @Path("top")
     @Transactional
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public TopPosts getTop() {
         final TopPosts top = new TopPosts();
         final Date now = new Date();
@@ -152,7 +151,7 @@ public class PostResource {
     @GET
     @Transactional
     @Path("select")
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class,
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class,
                  cacheKeyGenerator = JaxRsCacheKeyGenerator.class)
     public PostPage getPages(@CacheKey @QueryParam("offset") @DefaultValue("0") final int offset,
                              @CacheKey @QueryParam("number") @DefaultValue("20") final int max,
@@ -402,7 +401,7 @@ public class PostResource {
     @GET
     @Transactional
     @Path("slug/{slug}")
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public PostModel getBySlug(@PathParam("slug") final String slug) {
         return map(orNull(
                         () -> entityManager.createNamedQuery(Post.FIND_BY_SLUG, Post.class)
@@ -415,7 +414,7 @@ public class PostResource {
     @GET
     @Path("{id}")
     @Transactional
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public PostModel getById(@PathParam("id") final long id) {
         return map(orNull(
                         () -> entityManager.createNamedQuery(Post.FIND_BY_ID, Post.class)

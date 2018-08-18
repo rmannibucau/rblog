@@ -58,7 +58,7 @@ public class CategoryResource {
     @GET
     @Path("roots")
     @Transactional
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public List<CategoryModel> getParents() {
         return entityManager.createNamedQuery("Category.findByParent", Category.class)
                         .setParameter("parent", null)
@@ -70,7 +70,7 @@ public class CategoryResource {
     @GET
     @Path("all")
     @Transactional
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public List<CategoryModel> getAll() {
         return entityManager.createNamedQuery("Category.findAll", Category.class)
                         .getResultList().stream()
@@ -81,7 +81,7 @@ public class CategoryResource {
     @GET
     @Path("{id}")
     @Transactional
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public CategoryModel get(@CacheKey @PathParam("id") final long id) {
         return findById(id);
     }
@@ -89,7 +89,7 @@ public class CategoryResource {
     @GET
     @Path("slug/{slug}")
     @Transactional
-    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class)
     public CategoryModel get(@PathParam("slug") final String slug) {
         return ofNullable(entityManager.createNamedQuery("Category.findBySlug", Category.class)
                 .setParameter("slug", slug)
