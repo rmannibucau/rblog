@@ -30,6 +30,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import com.github.rmannibucau.rblog.jaxrs.provider.JSonProvider;
+import com.github.rmannibucau.rblog.jcache.LocalCacheManager;
 import com.github.rmannibucau.rblog.jpa.Token;
 import com.github.rmannibucau.rblog.jpa.User;
 import com.github.rmannibucau.rblog.security.web.model.Credentials;
@@ -70,6 +71,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import lombok.Getter;
 import lombok.extern.java.Log;
+
 
 @Log
 @ContainerProperties({
@@ -116,6 +118,11 @@ import lombok.extern.java.Log;
         // pool for backup each 3s
         @ContainerProperties.Property(name = "rblog.backup.polling", value = "PT3S"),
 
+        // activate jcache - workaround for 1.0.0
+        @ContainerProperties.Property(name = "org.apache.geronimo.jcache.simple.skip-cdi", value = "true"),
+
+        // default exclusion
+        // @ContainerProperties.Property(name = "openejb.additional.include", value = "geronimo-simple-jcache"),
         // this contains java 9 code so exclude it for the current min tomee version
         @ContainerProperties.Property(name = "openejb.additional.exclude", value = "lombok"),
 
@@ -141,6 +148,9 @@ public class RBlog {
 
     @Getter
     private GreenMail mail;
+
+    @Inject
+    private LocalCacheManager cacheManager;
 
     private WebDriver webDriver;
     private WebDriverWait waitDriver;
@@ -266,6 +276,7 @@ public class RBlog {
         inTx(() -> Stream.of("Token", "Notification", "Category", "Post", "User", "Attachment")
                 .forEach(table -> entityManager.createQuery("delete from " + table).executeUpdate()));
         cleanMails();
+        cacheManager.invalidate(null);
     }
 
     public void executeInAdminContext(final Runnable runnable) {

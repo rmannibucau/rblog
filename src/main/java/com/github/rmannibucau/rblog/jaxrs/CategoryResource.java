@@ -1,17 +1,18 @@
 package com.github.rmannibucau.rblog.jaxrs;
 
-import com.github.rmannibucau.rblog.configuration.Configuration;
-import com.github.rmannibucau.rblog.jaxrs.async.Async;
-import com.github.rmannibucau.rblog.jaxrs.model.CategoryModel;
-import com.github.rmannibucau.rblog.jaxrs.provider.EntityConcurrentModificationException;
-import com.github.rmannibucau.rblog.jaxrs.reflect.CollectionType;
-import com.github.rmannibucau.rblog.jpa.Category;
-import com.github.rmannibucau.rblog.security.cdi.Logged;
-import com.github.rmannibucau.rblog.service.SlugService;
+import static java.util.Collections.emptySet;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 
+import java.lang.reflect.Type;
+import java.util.List;
+
+import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheResult;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -22,15 +23,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.lang.reflect.Type;
-import java.util.List;
 
-import static java.util.Collections.emptySet;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
+import com.github.rmannibucau.rblog.configuration.Configuration;
+import com.github.rmannibucau.rblog.jaxrs.async.Async;
+import com.github.rmannibucau.rblog.jaxrs.model.CategoryModel;
+import com.github.rmannibucau.rblog.jaxrs.provider.EntityConcurrentModificationException;
+import com.github.rmannibucau.rblog.jaxrs.reflect.CollectionType;
+import com.github.rmannibucau.rblog.jcache.LocalCacheManager;
+import com.github.rmannibucau.rblog.jpa.Category;
+import com.github.rmannibucau.rblog.security.cdi.Logged;
+import com.github.rmannibucau.rblog.service.SlugService;
 
 @Path("category")
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,46 +52,50 @@ public class CategoryResource {
     @Configuration("${rblog.category.defaultColor:#000000}")
     private String defaultColor;
 
+    @Inject
+    private LocalCacheManager cache;
+
     @GET
-    @Async
     @Path("roots")
-    public void getParents(@Suspended final AsyncResponse response) {
-        response.resume(new GenericEntity<>(
-                entityManager.createNamedQuery("Category.findByParent", Category.class)
+    @Transactional
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public List<CategoryModel> getParents() {
+        return entityManager.createNamedQuery("Category.findByParent", Category.class)
                         .setParameter("parent", null)
                         .getResultList().stream()
                         .map(c -> toModel(c, true))
-                        .collect(toList()),
-                COLLECTION));
+                        .collect(toList());
     }
 
     @GET
-    @Async
     @Path("all")
-    public void getAll(@Suspended final AsyncResponse response) {
-        response.resume(new GenericEntity<>(
-                entityManager.createNamedQuery("Category.findAll", Category.class)
+    @Transactional
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public List<CategoryModel> getAll() {
+        return entityManager.createNamedQuery("Category.findAll", Category.class)
                         .getResultList().stream()
                         .map(c -> toModel(c, false))
-                        .collect(toList()),
-                COLLECTION));
+                        .collect(toList());
     }
 
     @GET
-    @Async
     @Path("{id}")
-    public void get(@PathParam("id") final long id, @Suspended final AsyncResponse response) {
-        response.resume(findById(id));
+    @Transactional
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public CategoryModel get(@CacheKey @PathParam("id") final long id) {
+        return findById(id);
     }
 
     @GET
-    @Async
     @Path("slug/{slug}")
-    public void get(@PathParam("slug") final String slug, @Suspended final AsyncResponse response) {
-        response.resume(
-                ofNullable(entityManager.createNamedQuery("Category.findBySlug", Category.class).setParameter("slug", slug).getSingleResult())
-                        .map(c -> toModel(c, true))
-                        .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND)));
+    @Transactional
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public CategoryModel get(@PathParam("slug") final String slug) {
+        return ofNullable(entityManager.createNamedQuery("Category.findBySlug", Category.class)
+                .setParameter("slug", slug)
+                .getSingleResult())
+                .map(c -> toModel(c, true))
+                .orElseThrow(() -> new WebApplicationException(Response.Status.NOT_FOUND));
     }
 
     @POST
@@ -110,6 +118,7 @@ public class CategoryResource {
         }
         entityManager.remove(entity);
         entityManager.flush();
+        cache.invalidate(CategoryResource.class);
     }
 
     private CategoryModel findById(final long id) {
@@ -145,6 +154,7 @@ public class CategoryResource {
             entityManager.persist(category);
         }
         entityManager.flush();
+        cache.invalidate(CategoryResource.class);
         return category;
     }
 

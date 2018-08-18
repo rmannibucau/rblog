@@ -90,6 +90,5 @@ public class TokenResource {
         if (!tokens.isEmpty()) {
             entityManager.flush();
         }
-
     }
 }

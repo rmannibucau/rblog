@@ -31,6 +31,11 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.apache.geronimo.specs</groupId>
+      <artifactId>geronimo-jcache_1.0_spec</artifactId>
+      <version>1.0-alpha-1</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.tomee</groupId>
       <artifactId>javaee-api</artifactId>
       <version>7.0</version>
@@ -53,6 +58,12 @@
       <artifactId>johnzon-jaxrs</artifactId>
       <version>0.9.5</version>
       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.geronimo</groupId>
+      <artifactId>geronimo-jcache-simple</artifactId>
+      <version>1.0.0</version>
     </dependency>
 
     <dependency>
@@ -263,6 +274,19 @@
         <version>${tomee.version}</version>
         <configuration>
           <context>ROOT</context>
+          <systemVariables>
+            <!-- bug of 1.0.0, fixed for 1.0.1 -->
+            <org.apache.geronimo.jcache.simple.skip-cdi>true</org.apache.geronimo.jcache.simple.skip-cdi>
+
+            <rblogDataSource>new://Resource?type=DataSource</rblogDataSource>
+            <rblogDataSource.JdbcUrl>jdbc:mysql://localhost:3306/rblog?nullNamePatternMatchesAll=true&amp;useUnicode=true&amp;useJDBCCompliantTimezoneShift=true&amp;serverTimezone=UTC</rblogDataSource.JdbcUrl>
+            <rblogDataSource.JdbcDriver>com.mysql.jdbc.Driver</rblogDataSource.JdbcDriver>
+            <rblogDataSource.Username>root</rblogDataSource.Username>
+            <rblogDataSource.Password>password</rblogDataSource.Password>
+          </systemVariables>
+          <libs>
+            <lib>mysql:mysql-connector-java:6.0.6</lib>
+          </libs>
         </configuration>
       </plugin>
       <plugin>

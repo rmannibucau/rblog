@@ -1,26 +1,30 @@
 package com.github.rmannibucau.rblog.jaxrs;
 
-import com.github.rmannibucau.rblog.configuration.Configuration;
-import com.github.rmannibucau.rblog.jaxrs.async.Async;
-import com.github.rmannibucau.rblog.jaxrs.model.AttachmentModel;
-import com.github.rmannibucau.rblog.jaxrs.model.CategoryModel;
-import com.github.rmannibucau.rblog.jaxrs.model.Message;
-import com.github.rmannibucau.rblog.jaxrs.model.NotificationModel;
-import com.github.rmannibucau.rblog.jaxrs.model.PostModel;
-import com.github.rmannibucau.rblog.jaxrs.model.PostPage;
-import com.github.rmannibucau.rblog.jaxrs.model.TopPosts;
-import com.github.rmannibucau.rblog.jaxrs.model.UserModel;
-import com.github.rmannibucau.rblog.jaxrs.provider.EntityConcurrentModificationException;
-import com.github.rmannibucau.rblog.jpa.Attachment;
-import com.github.rmannibucau.rblog.jpa.Category;
-import com.github.rmannibucau.rblog.jpa.Notification;
-import com.github.rmannibucau.rblog.jpa.Post;
-import com.github.rmannibucau.rblog.jpa.PostType;
-import com.github.rmannibucau.rblog.jpa.User;
-import com.github.rmannibucau.rblog.security.cdi.Logged;
-import com.github.rmannibucau.rblog.service.SlugService;
-import com.github.rmannibucau.rblog.social.SocialNotifier;
+import static com.github.rmannibucau.rblog.lang.Exceptions.orNull;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static javax.persistence.TemporalType.TIMESTAMP;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.TreeMap;
+import java.util.function.BinaryOperator;
+import java.util.stream.Stream;
+
+import javax.cache.annotation.CacheKey;
+import javax.cache.annotation.CacheResult;
 import javax.ejb.EJBException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -28,10 +32,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -48,27 +51,29 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.TreeMap;
-import java.util.function.BinaryOperator;
-import java.util.stream.Stream;
 
-import static com.github.rmannibucau.rblog.lang.Exceptions.orNull;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static javax.persistence.TemporalType.TIMESTAMP;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import com.github.rmannibucau.rblog.configuration.Configuration;
+import com.github.rmannibucau.rblog.jaxrs.async.Async;
+import com.github.rmannibucau.rblog.jaxrs.model.AttachmentModel;
+import com.github.rmannibucau.rblog.jaxrs.model.CategoryModel;
+import com.github.rmannibucau.rblog.jaxrs.model.Message;
+import com.github.rmannibucau.rblog.jaxrs.model.NotificationModel;
+import com.github.rmannibucau.rblog.jaxrs.model.PostModel;
+import com.github.rmannibucau.rblog.jaxrs.model.PostPage;
+import com.github.rmannibucau.rblog.jaxrs.model.TopPosts;
+import com.github.rmannibucau.rblog.jaxrs.model.UserModel;
+import com.github.rmannibucau.rblog.jaxrs.provider.EntityConcurrentModificationException;
+import com.github.rmannibucau.rblog.jcache.JaxRsCacheKeyGenerator;
+import com.github.rmannibucau.rblog.jcache.LocalCacheManager;
+import com.github.rmannibucau.rblog.jpa.Attachment;
+import com.github.rmannibucau.rblog.jpa.Category;
+import com.github.rmannibucau.rblog.jpa.Notification;
+import com.github.rmannibucau.rblog.jpa.Post;
+import com.github.rmannibucau.rblog.jpa.PostType;
+import com.github.rmannibucau.rblog.jpa.User;
+import com.github.rmannibucau.rblog.security.cdi.Logged;
+import com.github.rmannibucau.rblog.service.SlugService;
+import com.github.rmannibucau.rblog.social.SocialNotifier;
 
 @Path("post")
 @ApplicationScoped
@@ -104,10 +109,14 @@ public class PostResource {
     @Inject
     private SocialNotifier notfier;
 
+    @Inject
+    private LocalCacheManager cache;
+
     @GET
-    @Async
     @Path("top")
-    public void getTop(@Suspended final AsyncResponse response) { // TODO: cache by hour and eviction on notification?
+    @Transactional
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public TopPosts getTop() {
         final TopPosts top = new TopPosts();
         final Date now = new Date();
         top.setLasts(
@@ -137,26 +146,27 @@ public class PostResource {
                                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                                 },
                                 TreeMap::new)));
-        response.resume(top);
+        return top;
     }
 
     @GET
-    @Async
+    @Transactional
     @Path("select")
-    public void getPages(@QueryParam("offset") @DefaultValue("0") final int offset,
-                         @QueryParam("number") @DefaultValue("20") final int max,
-                         @QueryParam("orderBy") @DefaultValue("publishDate") final String orderBy,
-                         @QueryParam("order") @DefaultValue("desc") final String order,
-                         @QueryParam("type") @DefaultValue("post") final String type,
-                         @QueryParam("after") final String afterDate,
-                         @QueryParam("before") final String beforeDate,
-                         @QueryParam("status") final String status,
-                         @QueryParam("search") final String search,
-                         @QueryParam("categoryId") final long categoryId,
-                         @QueryParam("categorySlug") final String categorySlug,
-                         @QueryParam("light") @DefaultValue("false") final boolean light,
-                         @Context final SecurityContext securityContext,
-                         @Suspended final AsyncResponse response) {
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class,
+                 cacheKeyGenerator = JaxRsCacheKeyGenerator.class)
+    public PostPage getPages(@CacheKey @QueryParam("offset") @DefaultValue("0") final int offset,
+                             @CacheKey @QueryParam("number") @DefaultValue("20") final int max,
+                             @CacheKey @QueryParam("orderBy") @DefaultValue("publishDate") final String orderBy,
+                             @CacheKey @QueryParam("order") @DefaultValue("desc") final String order,
+                             @CacheKey @QueryParam("type") @DefaultValue("post") final String type,
+                             @CacheKey @QueryParam("after") final String afterDate,
+                             @CacheKey @QueryParam("before") final String beforeDate,
+                             @CacheKey @QueryParam("status") final String status,
+                             @CacheKey @QueryParam("search") final String search,
+                             @CacheKey @QueryParam("categoryId") final long categoryId,
+                             @CacheKey @QueryParam("categorySlug") final String categorySlug,
+                             @CacheKey @QueryParam("light") @DefaultValue("false") final boolean light,
+                             @Context final SecurityContext securityContext) {
         if (max > maxLimit) {
             throw new WebApplicationException(Response.status(Response.Status.PRECONDITION_FAILED).entity(new Message("max post is limited to " + maxLimit)).build());
         }
@@ -279,7 +289,7 @@ public class PostResource {
             total = 0;
         }
 
-        response.resume(new PostPage(total, items));
+        return new PostPage(total, items);
     }
 
     @POST
@@ -328,11 +338,9 @@ public class PostResource {
                                     return categoryResource.create(c);
                                 }
                                 throw new IllegalStateException("Missing category: " + c.getName());
-                            }))
-                            .collect(toList());
+                            })).sorted(Comparator.comparing(Category::getName)).collect(toList());
 
                     // sorting is not assured by the DB there
-                    Collections.sort(categories, (o1, o2) -> o1.getName().compareTo(o2.getName()));
 
                     post.setCategories(categories);
                 });
@@ -365,6 +373,7 @@ public class PostResource {
         }
 
         entityManager.flush();
+        cache.invalidate(PostResource.class);
 
         response.resume(findById(post.getId()));
     }
@@ -387,32 +396,33 @@ public class PostResource {
         ofNullable(entityManager.find(Notification.class, id)).ifPresent(n -> entityManager.remove(n));
         entityManager.remove(post);
         entityManager.flush();
+        cache.invalidate(PostResource.class);
     }
 
     @GET
-    @Async
+    @Transactional
     @Path("slug/{slug}")
-    public void getBySlug(@PathParam("slug") final String slug, @Suspended final AsyncResponse response) {
-        response.resume(
-                map(orNull(
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public PostModel getBySlug(@PathParam("slug") final String slug) {
+        return map(orNull(
                         () -> entityManager.createNamedQuery(Post.FIND_BY_SLUG, Post.class)
                                 .setParameter("slug", slug)
                                 .setParameter("publishedDate", new Date(), TIMESTAMP)
                                 .getSingleResult(),
-                        NoResultException.class), false));
+                        NoResultException.class), false);
     }
 
     @GET
-    @Async
     @Path("{id}")
-    public void getById(@PathParam("id") final long id, @Suspended final AsyncResponse response) {
-        response.resume(
-                map(orNull(
+    @Transactional
+    @CacheResult(cacheResolverFactory = LocalCacheManager.class, nonCachedExceptions = Exception.class)
+    public PostModel getById(@PathParam("id") final long id) {
+        return map(orNull(
                         () -> entityManager.createNamedQuery(Post.FIND_BY_ID, Post.class)
                                 .setParameter("id", id)
                                 .setParameter("publishedDate", new Date(), TIMESTAMP)
                                 .getSingleResult(),
-                        NoResultException.class), false));
+                        NoResultException.class), false);
     }
 
     private void rethrowNotificationError(final Throwable iae) {
