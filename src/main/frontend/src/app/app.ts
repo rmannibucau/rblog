@@ -30,11 +30,11 @@ export class App implements OnInit, OnDestroy {
               private http: Http) {
     this.showDataProtectionLawMessage = !dataLowProtection.accepted;
     if (!dataLowProtection.accepted) { // check we are in France, if so keep the "accept" behavior otherwise just use cookies
-      http.get('//geoip.nekudo.com/api').subscribe(
+      http.get('//freegeoip.app/json/').subscribe(
           response => {
             try {
               const json = response.json();
-              if (json.country && json.country.code != 'FR') {
+              if (json.country_code != 'FR') {
                 dataLowProtection.onAccept();
                 this.showDataProtectionLawMessage = false;
               }
