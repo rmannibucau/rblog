@@ -1,9 +1,6 @@
 package com.github.rmannibucau.rblog.jcache;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
@@ -34,27 +31,9 @@ public class LocalCacheManager implements CacheResolverFactory {
 
     @PostConstruct
     private void init() {
-        provider = Caching.getCachingProvider();
-        final URI uri = getJCacheUri();
-        cacheManager = provider.getCacheManager(uri, provider.getDefaultClassLoader());
-    }
-
-    // workaround until geronimo-simple-jcache 1.0.1 is out
-    private URI getJCacheUri() {
-        final URI uri = URI.create("geronimo:///simple-jcache.properties");
-        final Field decodedPath;
-        try {
-            decodedPath = URI.class.getDeclaredField("decodedPath");
-        } catch (final NoSuchFieldException e) {
-            throw new IllegalStateException(e);
-        }
-        decodedPath.setAccessible(true);
-        try {
-            decodedPath.set(uri, "simple-jcache.properties");
-        } catch (final IllegalAccessException e) {
-            throw new IllegalStateException(e);
-        }
-        return uri;
+        final ClassLoader appLoader = LocalCacheManager.class.getClassLoader();
+        provider = Caching.getCachingProvider(appLoader);
+        cacheManager = provider.getCacheManager(provider.getDefaultURI(), appLoader);
     }
 
     public void invalidate(final Class<?> cacheMatcher) {
