@@ -315,3 +315,6 @@ span.button-bottom > a.btn-primary {
   color: inherit;
   background-color: inherit;
 }
+span.button-bottom > a.btn-primary:active:focus {
+  background-color: #303030;
+}
