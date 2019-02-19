@@ -8,7 +8,7 @@ div(*ngIf="post").align-center.row
     div.vspace &nbsp;
     div
       div(*ngIf="post.categories && post.categories.length > 0").col-sm-6
-        a([routerLink]="['/category/', post.categories[0].slug]", href="#").pull-right
+        a([routerLink]="['/category/', post.categories[0].slug, post.categories[0].id]", href="#").pull-right
           div.text-center
             i.fa.fa-external-link.fa-2x
           div.text-center Back to {{post.categories[0].name}}&nbsp;

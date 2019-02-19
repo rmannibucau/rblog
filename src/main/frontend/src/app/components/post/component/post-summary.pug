@@ -2,21 +2,21 @@ h2
   a([routerLink]="['/post', post.slug ]", href="#") {{ post.title }}
 p
     em Created on {{ fixDate(post.published || post.created) | date:'fullDate' }} by {{ post.author?.displayName }}
-p {{ post.summary }}
-span(*ngIf="hasReadMore")
+p.post-summary {{ post.summary }}
+span(*ngIf="hasReadMore").button-bottom
   a([routerLink]="['/post', post.slug ]", *ngIf="!readMoreRight && !readMoreButton", href="#")
-    | Read more&nbsp;
+    | Read blog post&nbsp;
     i.fa.fa-caret-right
   a([routerLink]="['/post', post.slug ]", *ngIf="!readMoreRight && readMoreButton", href="#", role="button").btn-sm.btn-primary
-    | Read more&nbsp;
+    | Read blog post&nbsp;
     i.fa.fa-caret-right
   span(*ngIf="readMoreRight")
     div &nbsp;
-    span.pull-right.pull-bottom
+    span.pull-right
       a(*ngIf="readMoreButton", [routerLink]="['/post', post.slug ]", href="#", role="button").btn-sm.btn-primary
-        | Read more&nbsp;
+        | Read blog post&nbsp;
         i.fa.fa-caret-right
       a(*ngIf="!readMoreButton", [routerLink]="['/post', post.slug ]", href="#")
-        | Read more&nbsp;
+        | Read blog post&nbsp;
         i.fa.fa-caret-right
 div.clearfix

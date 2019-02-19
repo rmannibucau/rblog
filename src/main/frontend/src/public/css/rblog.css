@@ -300,3 +300,16 @@ nav.navbar {
   top: 50px;
   display: none;
 }
+
+.button-bottom {
+  bottom: 0;
+  position: absolute;
+  margin-bottom: 0.75rem;
+}
+.post-summary {
+  padding-bottom: 1.75rem;
+}
+
+.btn-primary {
+  border: #340100 solid 1px !important;
+}

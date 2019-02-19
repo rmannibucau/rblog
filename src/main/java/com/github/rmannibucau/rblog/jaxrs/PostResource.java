@@ -140,7 +140,8 @@ public class PostResource {
                                                 .map(p -> map(p, true))
                                                 .collect(toList()),
                                         c.getSlug(),
-                                        c.getColor()),
+                                        c.getColor(),
+                                        c.getId()),
                                 (u, v) -> {
                                     throw new IllegalStateException(String.format("Duplicate key %s", u));
                                 },

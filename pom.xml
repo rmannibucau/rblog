@@ -21,6 +21,8 @@
     <frontend.installDirectory>${user.home}/.rblog-build/node-installation-dir</frontend.installDirectory>
     <frontend.environment>prod</frontend.environment>
     <frontend.base>src/main/frontend</frontend.base>
+
+    <dev.mysql.version>6.0.6</dev.mysql.version>
   </properties>
 
   <dependencies>
@@ -63,7 +65,7 @@
     <dependency>
       <groupId>org.apache.geronimo</groupId>
       <artifactId>geronimo-jcache-simple</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
     </dependency>
 
     <dependency>
@@ -197,7 +199,7 @@
         <artifactId>tomee-embedded-maven-plugin</artifactId>
         <version>${tomee.version}</version>
         <configuration>
-          <context>/${project.artifactId}</context>
+          <context>ROOT</context>
           <docBase>${frontend.base}/dist</docBase>
           <classpathAsWar>true</classpathAsWar>
           <webResourceCached>false</webResourceCached>
@@ -220,8 +222,20 @@
             <!-- to test analytics setup
             <rblog.analytics.code>UA-XXXXX</rblog.analytics.code>
             -->
+            <rblogDataSource>new://Resource?type=DataSource</rblogDataSource>
+            <rblogDataSource.JdbcUrl>jdbc:mysql://localhost:3306/rblog?nullNamePatternMatchesAll=true&amp;useUnicode=true&amp;useJDBCCompliantTimezoneShift=true&amp;serverTimezone=UTC</rblogDataSource.JdbcUrl>
+            <rblogDataSource.JdbcDriver>com.mysql.jdbc.Driver</rblogDataSource.JdbcDriver>
+            <rblogDataSource.Username>root</rblogDataSource.Username>
+            <rblogDataSource.Password>password</rblogDataSource.Password>
           </containerProperties>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${dev.mysql.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
       <plugin> <!-- frontend build (nodejs), generated at prepare-package to be there for tests -->
         <groupId>com.github.eirslett</groupId>
@@ -285,7 +299,7 @@
             <rblogDataSource.Password>password</rblogDataSource.Password>
           </systemVariables>
           <libs>
-            <lib>mysql:mysql-connector-java:6.0.6</lib>
+            <lib>mysql:mysql-connector-java:${dev.mysql.version}</lib>
           </libs>
         </configuration>
       </plugin>

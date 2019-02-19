@@ -19,5 +19,6 @@ public class TopPosts {
         private Collection<PostModel> posts;
         private String slug;
         private String color;
+        private long id;
     }
 }
