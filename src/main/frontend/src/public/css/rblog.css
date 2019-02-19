@@ -310,6 +310,8 @@ nav.navbar {
   padding-bottom: 1.75rem;
 }
 
-.btn-primary {
+span.button-bottom > a.btn-primary {
   border: #340100 solid 1px !important;
+  color: inherit;
+  background-color: inherit;
 }
