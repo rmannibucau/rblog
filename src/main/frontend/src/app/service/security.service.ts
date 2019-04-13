@@ -1,6 +1,7 @@
 import {Injectable, ReflectiveInjector} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {Observer} from 'rxjs/Observer';
+import {map} from 'rxjs/operators'
 import {RestClient} from './rest.service';
 
 const HEADER = 'RBLOG-SECURITY-TOKEN'; // the actual http header name
@@ -19,9 +20,10 @@ export class SecurityService {
       if (token) {
           this.initToken(window.localStorage.getItem(USERNAME), token, false);
       }
-      this.lifecycleListener = new Observable<boolean>(o => this.lifecycleEmitter = o)
-          .startWith(this.internalIsLogged())
-          .share();
+      this.lifecycleListener = Observable.create(o => {
+        this.lifecycleEmitter = o
+        o.next(this.internalIsLogged());
+      });
     }
 
     initToken(username, token, store) {
@@ -35,11 +37,11 @@ export class SecurityService {
 
     login(credentials) {
         return this.http.post('security/login', credentials)
-            .map(res => {
+            .pipe(map(res => {
               this.initToken(credentials.username, res.token, credentials.rememberMe)
               this.lifecycleEmitter.next(true);
               return res;
-            });
+            }));
     }
 
     logout() {

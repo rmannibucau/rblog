@@ -8,7 +8,7 @@ import {NotificationService} from '../../service/notification.service';
 
 @Component({
   selector: 'category',
-  template: require('./category.pug')
+  template: require('./category.pug')()
 })
 export class Category implements OnDestroy {
     notificationsOptions = {};

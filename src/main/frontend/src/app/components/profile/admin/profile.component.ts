@@ -7,7 +7,7 @@ import {BackupService} from '../../../service/backup.service';
 
 @Component({
   selector: 'profile',
-  template: require('./profile.pug')
+  template: require('./profile.pug')()
 })
 export class AdminProfile extends AdminComponent {
     notificationsOptions = {};

@@ -3,7 +3,7 @@ import {PostService} from '../../../service/post.service';
 
 @Component({
   selector: 'post-list',
-  template: require('./post-list.pug')
+  template: require('./post-list.pug')()
 })
 export class PostList implements AfterViewInit {
   @Input() title;

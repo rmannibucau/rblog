@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
+import {Observable, of} from 'rxjs';
+import {map} from 'rxjs/operators'
 import {RestClient} from './rest.service';
 
 @Injectable()
@@ -13,13 +14,13 @@ export class BitlyService {
     if (this.active != null) {
       return Observable.of(this.active);
     }
-    return this.http.get('bitly/state').map(json => {
+    return this.http.get('bitly/state').pipe(map(json => {
       this.active = !!json['active'];
       return this.active;
-    });
+    }));
   }
 
   shorten(url) {
-    return this.http.post('bitly/shorten', {value: url}).map(json => json['value']);
+    return this.http.post('bitly/shorten', {value: url}).pipe(map(json => json['value']));
   }
 }

@@ -10,7 +10,7 @@ class LoginForm {
     rememberMe: boolean;
 }
 
-@Component({ selector: 'login', template: require('./login.pug') })
+@Component({ selector: 'login', template: require('./login.pug')() })
 export class Login {
     formData: LoginForm = new LoginForm();
     error: string;
@@ -28,7 +28,7 @@ export class Login {
 }
 
 
-@Component({ selector: 'logout', template: require('./logout.pug') })
+@Component({ selector: 'logout', template: require('./logout.pug')() })
 export class Logout {
     error: string;
 

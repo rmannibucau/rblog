@@ -1,5 +1,3 @@
-import '../vendor';
-
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {Router} from '@angular/router';
 import {Http} from '@angular/http';
@@ -9,11 +7,13 @@ import {SecurityService} from './service/security.service';
 import {DataProtectionLaw} from './service/cookie.service';
 import {CategoryService} from './service/category.service';
 
+import '../public/theme/startbootstrap-scrolling-nav-1.0.4/js/bootstrap.min';
+
 declare var $: any;
 
 @Component({
   selector: 'app',
-  template: require('./app.pug')
+  template: require('./app.pug')()
 })
 export class App implements OnInit, OnDestroy {
   private showDataProtectionLawMessage: boolean;

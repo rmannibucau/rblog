@@ -1,4 +1,5 @@
-import {Injectable, EventEmitter} from "@angular/core";
+import {Injectable, EventEmitter} from '@angular/core';
+import {map} from 'rxjs/operators'
 import {RestClient} from "./rest.service";
 
 @Injectable()
@@ -25,17 +26,17 @@ export class CategoryService {
     }
 
     save(category) {
-        return this.http.post('category', category).map(res => {
+        return this.http.post('category', category).pipe(map(res => {
           this.listener.emit(null);
           return res;
-        });
+        }));
     }
 
     removeById(id) {
-        return this.http.delete('category/' + id).map(r => {
+        return this.http.delete('category/' + id).pipe(map(r => {
           this.listener.emit(null);
           return r;
-        });
+        }));
     }
 
     listenChanges(subscriber) {

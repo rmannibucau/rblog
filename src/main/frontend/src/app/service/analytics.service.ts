@@ -1,5 +1,6 @@
-import {Injectable, EventEmitter} from "@angular/core";
-import {RestClient} from "./rest.service";
+import {Injectable, EventEmitter} from '@angular/core';
+import {map} from 'rxjs/operators'
+import {RestClient} from './rest.service';
 import {DataProtectionLaw} from './cookie.service';
 import {SecurityService} from './security.service';
 
@@ -16,7 +17,7 @@ export class AnalyticsService {
       }
       this.dpl.onAccepted(() => {
           http.get('configuration')
-        .map(r => r.analytics)
+        .pipe(map(r => r.analytics))
         .subscribe(code => {
           if (!code) {
             return;

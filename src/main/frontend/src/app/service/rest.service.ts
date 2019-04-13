@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Http, Headers, RequestOptions, ResponseContentType} from '@angular/http';
+import {map} from 'rxjs/operators'
 
 const base = '/api/';
 
@@ -13,7 +14,8 @@ export class RestClient {
     }
 
     post(endpoint, body) {
-        return this.http.post(base + endpoint, JSON.stringify(body), new RequestOptions({headers: this.postHeaders})).map(r => r.json());
+        return this.http.post(base + endpoint, JSON.stringify(body), new RequestOptions({headers: this.postHeaders}))
+            .pipe(map(r => r.json()));
     }
 
     head(endpoint) {
@@ -29,7 +31,7 @@ export class RestClient {
     }
 
     get(endpoint) {
-        return this.getRaw(endpoint, undefined).map(r => r.json());
+        return this.getRaw(endpoint, undefined).pipe(map((r) => r.json()));
     }
 
     delete(endpoint) {

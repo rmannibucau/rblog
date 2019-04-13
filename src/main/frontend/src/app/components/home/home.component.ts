@@ -6,7 +6,7 @@ import {NotificationService} from '../../service/notification.service';
 
 @Component({
   selector: 'home',
-  template: require('./home.pug')
+  template: require('./home.pug')()
 })
 export class Home {
   data = {};

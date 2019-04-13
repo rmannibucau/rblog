@@ -1,5 +1,6 @@
 import {Component, OnInit, AfterViewInit} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import {map} from 'rxjs/operators'
 import {AdminComponent} from '../../common/admin.component';
 import {SecurityService} from '../../../service/security.service';
 import {PostService} from '../../../service/post.service';
@@ -20,7 +21,7 @@ const TWEEK_LINK_LEN = 23;
 
 @Component({
   selector: 'post',
-  template: require('./post.pug')
+  template: require('./post.pug')()
 })
 export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
     notificationsOptions = {};
@@ -64,7 +65,7 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
 
           this.submitText = 'Update';
           this.title = 'Update post';
-          this.postService.findById(postId).map(p => this.postLoadPost(p)).subscribe(
+          this.postService.findById(postId).pipe(map(p => this.postLoadPost(p))).subscribe(
             post => {
                 this.formData = post;
                 if (this.viewInit) {
@@ -131,7 +132,7 @@ export class AdminPost extends AdminComponent implements OnInit, AfterViewInit {
           copy.published = copy.published + ':00Z'; // UTC by default
         }
 
-        this.postService.save(copy).map(p => this.postLoadPost(p)).subscribe(result => {
+        this.postService.save(copy).pipe(map(p => this.postLoadPost(p))).subscribe(result => {
             this.router.navigate(['/admin/posts']);
         }, error => this.notifyService.error('Error', 'Can\'t save post (HTTP ' + error.status + ').'));
     }

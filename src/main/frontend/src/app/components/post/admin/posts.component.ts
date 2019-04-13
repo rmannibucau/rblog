@@ -7,7 +7,7 @@ import {NotificationService} from '../../../service/notification.service';
 
 @Component({
   selector: 'posts',
-  template: require('./posts.pug')
+  template: require('./posts.pug')()
 })
 export class AdminPosts extends AdminComponent implements OnInit {
     notificationsOptions = {};

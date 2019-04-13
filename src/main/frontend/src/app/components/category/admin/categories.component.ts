@@ -7,7 +7,7 @@ import {NotificationService} from '../../../service/notification.service';
 
 @Component({
   selector: 'categories',
-  template: require('./categories.pug')
+  template: require('./categories.pug')()
 })
 export class AdminCategories extends AdminComponent implements OnInit {
   categories = [];

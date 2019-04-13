@@ -14,7 +14,7 @@ div.align-center.container
                 td {{user.displayName}}
                 td {{user.mail}}
                 td
-                    a(v-link="['AdminUserById', {'id': user.id}]")
+                    a([routerLink]="['/admin/user/:id', {'id': user.id}]")
                         i.glyphicon.glyphicon-edit
                         span Edit
                     span &nbsp;&nbsp;

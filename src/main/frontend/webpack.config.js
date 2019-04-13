@@ -3,12 +3,11 @@ var path = require('path');
 var webpack = require('webpack');
 
 // Webpack Plugins
-var CommonsChunkPlugin = webpack.optimize.CommonsChunkPlugin;
 var autoprefixer = require('autoprefixer');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
-var CompressionPlugin = require('compression-webpack-plugin');
+var TerserPlugin = require('terser-webpack-plugin');
 
 // env for dev debugging
 var compileEnv = process.env.APP_ENV || 'prod';
@@ -21,17 +20,17 @@ console.log('');
 
 module.exports = function() {
   var config = {
+    mode: isDev ? 'development' : 'production',
     devtool: 'source-map',
     entry: {
-     'polyfills': './src/polyfills.ts',
-     'vendor': './src/vendor.ts',
-     'app': './src/main.ts'
+     app: './src/main.ts',
+     polyfills: './src/polyfills.ts'
     },
     output: {
       path: root('dist'),
       publicPath: rootPath,
       filename: !isDev ? 'js/[name].[hash].js' : 'js/[name].js',
-      chunkFilename: !isDev ? '[id].[hash].chunk.js' : '[id].chunk.js'
+      chunkFilename: !isDev ? 'js/[name].[hash].js' : 'js/[name].js'
     },
     resolve: {
       unsafeCache: !isDev,
@@ -45,48 +44,55 @@ module.exports = function() {
     },
     module: {
       rules: [
-        {test: /\.ts$/, use:{loader: 'ts-loader'}},
-        {test: /\.pug$/, use:{loader: 'pug-html-loader'}},
-        {test: /\.html$/, use:{loader: 'raw-loader'}},
-        {test: /\.css$/, use:{loader: 'raw-loader'}}
-      ],
-      noParse: [/.+zone\.js\/dist\/.+/, /.+angular2\/bundles\/.+/, /angular2-polyfills\.js/]
+        {test: /\.ts$/, use: 'ts-loader'},
+        {test: /\.pug$/, use: 'pug-loader'},
+        {test: /\.html$/, use: 'raw-loader'},
+        {test: /\.css$/, use: 'raw-loader'}
+      ]
+    },
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          vendor: {
+            test: function (module) {
+                var context = module.context;
+                return context && context.indexOf('node_modules') >= 0;
+            },
+            name: 'vendor',
+            chunks: 'all'
+          }
+        }
+      }
     }
   };
 
-  var chunks = ['app', 'vendor', 'polyfills'];
   config.plugins = [
     new webpack.ProvidePlugin({ $: 'jquery', jQuery: 'jquery', 'window.$': 'jquery', 'window.jQuery': 'jquery' }),
     new webpack.DefinePlugin({ 'process.env': { 'compileEnv': "'" + compileEnv + "'" } }),
-    new CommonsChunkPlugin({ name: chunks, minChunks: Infinity }),
     new CopyWebpackPlugin([{ from: root('src/public') }]), // before next one otherwise index.html can miss injections
-    new HtmlWebpackPlugin({ template: './src/public/index.html', inject: 'body', chunksSortMode: function sort(a, b) {
-        return chunks.indexOf(b.names[0]) - chunks.indexOf(a.names[0]); // reverse order
-      }
-    }),
-    // avoid warnings: "Critical dependency: the request of a dependency is an expression"
-    new webpack.ContextReplacementPlugin(/angular(\\|\/)core(\\|\/)(esm(\\|\/)src|src)(\\|\/)linker/, root('./src'))
+    new HtmlWebpackPlugin({ template: './src/public/index.html', inject: 'body', chunksSortMode: "manual", chunks: ['polyfills', 'vendor', 'app'] }),
+    /*
+    new webpack.optimize.AggressiveSplittingPlugin({
+      minSize: 128,
+      maxSize: 512
+    })
+    */
   ];
 
   if (!isDev) {
-    config.plugins.push(
-      new webpack.NoErrorsPlugin(),
-      // new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.UglifyJsPlugin({
-        beautify: false,
-        comments: false,
-        mangle: {
-          screw_ie8 : true,
-          keep_fnames: true
-        },
-        compress: {
-          screw_ie8: true
+    config.optimization.minimize = true
+    config.optimization.minimizer = [
+      new TerserPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: isDev,
+        terserOptions: { // todo
+          // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
         }
       }),
-      new CompressionPlugin({
-        regExp: /\.css$|\.html$|\.js$|\.map$/,
-        threshold: 2 * 1024
-      })
+    ];
+    config.plugins.push(
+      new webpack.NoEmitOnErrorsPlugin()
     );
   }
 

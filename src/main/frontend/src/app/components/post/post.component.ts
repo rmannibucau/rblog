@@ -12,7 +12,7 @@ declare var $: any;
 
 @Component({
   selector: 'post',
-  template: require('./post.pug'),
+  template: require('./post.pug')(),
   styles: [require('../../../public/js/lib/ckeditor/plugins/codesnippet/lib/highlight/styles/idea.css')]
 })
 export class Post implements AfterViewChecked, AfterViewInit, OnInit, OnDestroy {

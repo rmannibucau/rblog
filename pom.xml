@@ -240,7 +240,7 @@
       <plugin> <!-- frontend build (nodejs), generated at prepare-package to be there for tests -->
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
-        <version>1.0</version>
+        <version>1.6</version>
         <executions>
           <execution>
             <id>install-node-and-npm</id>
@@ -289,9 +289,6 @@
         <configuration>
           <context>ROOT</context>
           <systemVariables>
-            <!-- bug of 1.0.0, fixed for 1.0.1 -->
-            <org.apache.geronimo.jcache.simple.skip-cdi>true</org.apache.geronimo.jcache.simple.skip-cdi>
-
             <rblogDataSource>new://Resource?type=DataSource</rblogDataSource>
             <rblogDataSource.JdbcUrl>jdbc:mysql://localhost:3306/rblog?nullNamePatternMatchesAll=true&amp;useUnicode=true&amp;useJDBCCompliantTimezoneShift=true&amp;serverTimezone=UTC</rblogDataSource.JdbcUrl>
             <rblogDataSource.JdbcDriver>com.mysql.jdbc.Driver</rblogDataSource.JdbcDriver>

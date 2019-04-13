@@ -9,7 +9,7 @@ export class NotificationService implements OnInit {
   }
 
   ngOnInit() {
-    this.delegate.getChangeEmitter().subscribe(() => {}, () => {}, () => this.hide());
+    this.delegate.emitter.subscribe(() => {}, () => {}, () => this.hide());
   }
 
   error(title, msg) {
