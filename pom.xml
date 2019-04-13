@@ -65,7 +65,7 @@
     <dependency>
       <groupId>org.apache.geronimo</groupId>
       <artifactId>geronimo-jcache-simple</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.2</version>
     </dependency>
 
     <dependency>
@@ -89,7 +89,7 @@
     <dependency>
       <groupId>commons-fileupload</groupId>
       <artifactId>commons-fileupload</artifactId>
-      <version>1.3.1</version>
+      <version>1.4</version>
       <scope>test</scope>
     </dependency>
     <dependency>
