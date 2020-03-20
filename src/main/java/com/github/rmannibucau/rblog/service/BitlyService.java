@@ -4,7 +4,6 @@ import com.github.rmannibucau.rblog.configuration.Configuration;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.johnzon.jaxrs.JohnzonProvider;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -15,8 +14,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.client.Entity.entity;
@@ -66,19 +63,10 @@ public class BitlyService {
 
     public String bitlyize(final String toShorten) {
         return target
-                .queryParam("longUrl", encode(toShorten))
                 .request(APPLICATION_JSON_TYPE)
                 .header("Authorization", "Bearer " + token)
                 .post(entity(new BitlyData(group, domain, toShorten), APPLICATION_JSON_TYPE), BitlyResponse.class)
                 .getLink();
-    }
-
-    private String encode(final String url) {
-        try {
-            return URLEncoder.encode(url, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
-        }
     }
 
     @Data
