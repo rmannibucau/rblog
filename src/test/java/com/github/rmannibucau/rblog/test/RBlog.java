@@ -91,6 +91,7 @@ import lombok.extern.java.Log;
         @ContainerProperties.Property(name = "rblog.twitter.api.update.url", value = "http://localhost:${http.port}/api/1.1/statuses/update.json"),
 
         // bitly setup
+        @ContainerProperties.Property(name = "rblog.bitly.group", value = "testbitlygroup"),
         @ContainerProperties.Property(name = "rblog.bitly.token", value = "testbitly"),
         @ContainerProperties.Property(name = "rblog.bitly.url", value = "http://localhost:${http.port}/api/bitly-mock"),
 

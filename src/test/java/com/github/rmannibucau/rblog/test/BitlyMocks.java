@@ -1,10 +1,13 @@
 package com.github.rmannibucau.rblog.test;
 
+import com.github.rmannibucau.rblog.service.BitlyService;
+
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import static org.junit.Assert.assertEquals;
@@ -12,11 +15,12 @@ import static org.junit.Assert.assertEquals;
 @Path("bitly-mock")
 @ApplicationScoped
 public class BitlyMocks {
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public String get(@QueryParam("access_token") final String token, @QueryParam("longUrl") final String url) {
-        assertEquals("testbitly", token);
-        assertEquals("http://test#/foo", url);
-        return "{\"data\":{\"url\":\"http://short/bitly\"},\"status_code\":200}";
+    public String post(@HeaderParam(HttpHeaders.AUTHORIZATION) final String token,
+                       final BitlyService.BitlyData data) {
+        assertEquals("Bearer testbitly", token);
+        assertEquals("http://test#/foo", data.getLong_url());
+        return "{\"link\":\"http://short/bitly\"}";
     }
 }
