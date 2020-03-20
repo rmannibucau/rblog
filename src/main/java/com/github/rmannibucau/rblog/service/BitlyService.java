@@ -72,7 +72,6 @@ public class BitlyService {
     @Data
     public static class BitlyResponse {
         private String link;
-        private int status_code;
     }
 
     @Data
