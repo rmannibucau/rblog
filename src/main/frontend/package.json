@@ -23,7 +23,7 @@
     "ckeditor": "4.5.8",
     "core-js": "2.6.5",
     "intl": "1.2.4",
-    "jquery": "2.2.4",
+    "jquery": "3.5.0",
     "jquery-ui-bundle": "1.12.1-migrate",
     "ng2-cookies": "1.0.12",
     "rxjs": "6.4.0",
