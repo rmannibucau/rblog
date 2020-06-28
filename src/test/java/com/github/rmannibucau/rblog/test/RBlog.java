@@ -77,7 +77,7 @@ import lombok.extern.java.Log;
 @ContainerProperties({
         @ContainerProperties.Property(name = "jdbc/rblog", value = "new://Resource?type=DataSource"),
         @ContainerProperties.Property(name = "jdbc/rblog.JdbcDriver", value = "org.h2.Driver"),
-        @ContainerProperties.Property(name = "jdbc/rblog.JdbcUrl", value = "jdbc:h2:mem:rblog_test;MVCC=true"),
+        @ContainerProperties.Property(name = "jdbc/rblog.JdbcUrl", value = "jdbc:h2:mem:rblog_test"),
         // @ContainerProperties.Property(name = "jdbc/rblog.LogSql", value = "true"),
 
         // work around

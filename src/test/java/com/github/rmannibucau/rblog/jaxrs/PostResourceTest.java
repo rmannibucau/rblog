@@ -164,7 +164,7 @@ public class PostResourceTest {
             .request(MediaType.APPLICATION_JSON_TYPE)
             .get(TopPosts.class);
         assertEquals(3, posts.getLasts().size());
-        posts.getLasts().stream().forEach(p -> assertNull(p.getContent())); // not loaded for this endpoint
+        posts.getLasts().forEach(p -> assertNull(p.getContent())); // not loaded for this endpoint
         assertEquals(2, posts.getByCategories().size());
 
         final TopPosts.CategoryData category0 = posts.getByCategories().get("Category 0");

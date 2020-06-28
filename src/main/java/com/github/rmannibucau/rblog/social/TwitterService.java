@@ -63,7 +63,7 @@ public class TwitterService implements SocialService {
 
     @Inject
     @Getter
-    @Configuration("${rblog.twitter.link.length:140}")
+    @Configuration("${rblog.twitter.link.length:250}")
     private Integer twitterMaxLen;
 
     @Inject

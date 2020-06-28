@@ -15,7 +15,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <tomee.version>7.0.4</tomee.version>
+    <tomee.version>8.0.3</tomee.version>
     <selenium.version>2.53.1</selenium.version>
 
     <frontend.installDirectory>${user.home}/.rblog-build/node-installation-dir</frontend.installDirectory>
@@ -40,38 +40,45 @@
     <dependency>
       <groupId>org.apache.tomee</groupId>
       <artifactId>javaee-api</artifactId>
-      <version>7.0</version>
+      <version>8.0-3</version>
+      <scope>provided</scope>
+      <classifier>tomcat</classifier>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-servlet-api</artifactId>
+      <version>9.0.35</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.18.2</version>
+      <version>1.18.12</version>
       <scope>provided</scope>
     </dependency>
     <dependency> <!-- not strictly needed but makes tooling smoother cause of PersistenceCapable usage -->
       <groupId>org.apache.openjpa</groupId>
       <artifactId>openjpa</artifactId>
-      <version>2.4.1</version>
+      <version>3.1.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency> <!-- for custom date format + lombok integration -->
       <groupId>org.apache.johnzon</groupId>
       <artifactId>johnzon-jaxrs</artifactId>
-      <version>0.9.5</version>
+      <version>1.2.5</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>org.apache.geronimo</groupId>
       <artifactId>geronimo-jcache-simple</artifactId>
-      <version>1.0.2</version>
+      <version>1.0.4</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>4.13</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -83,7 +90,7 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.191</version>
+      <version>1.4.200</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -97,6 +104,12 @@
       <artifactId>ziplock</artifactId>
       <version>${tomee.version}</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
