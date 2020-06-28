@@ -20,7 +20,7 @@
     "@angular/platform-browser-dynamic": "7.2.13",
     "@angular/router": "7.2.13",
     "angular2-notifications": "2.0.0",
-    "ckeditor": "4.5.8",
+    "ckeditor": "4.12.1",
     "core-js": "2.6.5",
     "intl": "1.2.4",
     "jquery": "2.2.4",
