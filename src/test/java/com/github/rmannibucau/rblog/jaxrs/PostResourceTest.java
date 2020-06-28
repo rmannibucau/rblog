@@ -717,9 +717,12 @@ public class PostResourceTest {
                             new NotificationModel("Super new post on the blog\n\n" +
                                     ">>>> http://bit.ly/GDBEHIKBD3748 <<<<\n\n" +
                                     "About a super topic\n\n#hash #tag #super #yeah\n\n" +
+                                    "Come and read more about it ASAP!\nSuper new post on the blog\n\n" +
+                                    ">>>> http://bit.ly/GDBEHIKBD3748 <<<<\n\n" +
+                                    "About a super topic\n\n#hash #tag #super #yeah\n\n" +
                                     "Come and read more about it ASAP!\n", published)), MediaType.APPLICATION_JSON_TYPE));
             assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-            assertEquals("Message too long: 143 instead of 140", response.readEntity(String.class));
+            assertEquals("Message too long: 286 instead of 250", response.readEntity(String.class));
         });
     }
 
