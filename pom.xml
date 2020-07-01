@@ -22,7 +22,7 @@
     <frontend.environment>prod</frontend.environment>
     <frontend.base>src/main/frontend</frontend.base>
 
-    <dev.mysql.version>6.0.6</dev.mysql.version>
+    <dev.mysql.version>8.0.16</dev.mysql.version>
   </properties>
 
   <dependencies>
